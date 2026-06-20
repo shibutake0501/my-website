@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>引越し手続きについて</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic', sans-serif;
+      background: #fff;
+      display: flex;
+      justify-content: center;
+    }
+
+    .page {
+      width: 390px;
+      min-height: 100vh;
+      background: #fff;
+    }
+
+    /* ヘッダー */
+    .header {
+      display: flex;
+      align-items: center;
+      padding: 16px 20px;
+      border-bottom: 0.5px solid #e0e0e0;
+      background: #fff;
+    }
+
+    .back-btn {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #333;
+      flex-shrink: 0;
+    }
+
+    .header-title {
+      flex: 1;
+      text-align: center;
+      font-size: 17px;
+      font-weight: 700;
+      color: #111;
+    }
+
+    .header-space {
+      width: 32px;
+    }
+
+    /* コンテンツ */
+    .content {
+      padding: 24px 20px;
+    }
+
+    .section-heading {
+      font-size: 17px;
+      font-weight: 700;
+      color: #111;
+      margin-bottom: 10px;
+    }
+
+    .section-desc {
+      font-size: 15px;
+      color: #333;
+      line-height: 1.6;
+      margin-bottom: 6px;
+    }
+
+    .required-note {
+      font-size: 15px;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    .required-note .asterisk {
+      color: #cc0000;
+      font-weight: 700;
+      margin-right: 4px;
+    }
+
+    /* マイナンバーカードボックス */
+    .mynumber-box {
+      background: #e8e8f8;
+      border-radius: 12px;
+      padding: 18px 18px 16px;
+      margin-bottom: 28px;
+    }
+
+    .mynumber-box p {
+      font-size: 16px;
+      font-weight: 700;
+      color: #111;
+      line-height: 1.5;
+      margin-bottom: 14px;
+    }
+
+    .mynumber-btn {
+      display: block;
+      width: 100%;
+      height: 52px;
+      background: #fff;
+      border: 1.5px solid #c0c0d0;
+      border-radius: 30px;
+      font-size: 16px;
+      font-weight: 500;
+      color: #111;
+      cursor: pointer;
+      text-align: center;
+      line-height: 52px;
+    }
+
+    /* フォームフィールド */
+    .field {
+      margin-bottom: 28px;
+    }
+
+    .field-label {
+      font-size: 16px;
+      font-weight: 700;
+      color: #111;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .field-label .asterisk {
+      color: #cc0000;
+      font-size: 18px;
+    }
+
+    .field-sublabel {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 6px;
+    }
+
+    .text-input {
+      width: 100%;
+      height: 52px;
+      border: 1.5px solid #bbbbc8;
+      border-radius: 8px;
+      padding: 0 14px;
+      font-size: 16px;
+      color: #333;
+      background: #fff;
+      outline: none;
+    }
+
+    .text-input:focus {
+      border-color: #4444cc;
+    }
+
+    .input-hint {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 6px;
+    }
+
+    .hint-text {
+      font-size: 12px;
+      color: #888;
+      line-height: 1.6;
+    }
+
+    .char-count {
+      font-size: 12px;
+      color: #888;
+      white-space: nowrap;
+      margin-left: 8px;
+    }
+
+    /* 例バッジ */
+    .example-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .badge-rei {
+      font-size: 12px;
+      background: #e0e0e0;
+      color: #444;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+
+    .example-text {
+      font-size: 13px;
+      color: #666;
+      letter-spacing: 0.05em;
+    }
+
+    /* ラジオボタン */
+    .radio-group {
+      display: flex;
+      gap: 32px;
+      padding: 8px 0;
+    }
+
+    .radio-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 16px;
+      color: #222;
+      cursor: pointer;
+    }
+
+    .radio-label input[type="radio"] {
+      width: 22px;
+      height: 22px;
+      accent-color: #2d2dcc;
+      cursor: pointer;
+    }
+
+    /* 住所セクション */
+    .address-desc {
+      font-size: 15px;
+      color: #333;
+      margin-bottom: 14px;
+    }
+
+    .zip-row {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      margin-bottom: 6px;
+    }
+
+    .zip-input {
+      flex: 1;
+      height: 52px;
+      border: 1.5px solid #bbbbc8;
+      border-radius: 8px;
+      padding: 0 14px;
+      font-size: 16px;
+      color: #333;
+      background: #fff;
+      outline: none;
+    }
+
+    .zip-input:focus {
+      border-color: #4444cc;
+    }
+
+    .zip-search-btn {
+      height: 52px;
+      padding: 0 22px;
+      background: #fff;
+      color: #2d2dcc;
+      border: 2px solid #2d2dcc;
+      border-radius: 30px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .zip-hint {
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 16px;
+    }
+
+    .pref-label {
+      font-size: 13px;
+      color: #555;
+      margin-bottom: 6px;
+    }
+
+    .pref-select {
+      width: 100%;
+      height: 52px;
+      border: 1.5px solid #bbbbc8;
+      border-radius: 8px;
+      padding: 0 14px;
+      font-size: 16px;
+      color: #333;
+      background: #fff;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      outline: none;
+    }
+
+    .pref-select:focus {
+      border-color: #4444cc;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="header">
+      <div class="back-btn" aria-label="戻る">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="m15 18-6-6 6-6"/>
+        </svg>
+      </div>
+      <div class="header-title">引越し手続きについて</div>
+      <div class="header-space"></div>
+    </div>
+
+    <div class="content">
+      <div class="section-heading">申請者情報の入力</div>
+      <div class="section-desc">申請者の情報を入力してください。</div>
+      <div class="required-note">
+        <span class="asterisk">*</span>がついている項目は必須入力です。
+      </div>
+
+      <div class="mynumber-box">
+        <p>マイナンバーカードを使って、自動入力ができます。</p>
+        <button class="mynumber-btn">マイナンバーカードで自動入力</button>
+      </div>
+
+      <!-- 氏名 -->
+      <div class="field">
+        <div class="field-label">
+          氏名（漢字またはアルファベット）<span class="asterisk">*</span>
+        </div>
+        <input class="text-input" type="text" placeholder="山田　太郎" id="name-input" maxlength="30">
+        <div class="input-hint">
+          <div>
+            <div class="hint-text">住民票記載の氏名を全角文字で入力してください。</div>
+            <div class="hint-text">姓と名の間には空白を入れてください。</div>
+          </div>
+          <span class="char-count" id="char-count">0/30</span>
+        </div>
+        <div class="example-row">
+          <span class="badge-rei">例</span>
+          <span class="example-text">山田　花子、ＪＯＨＮ　ＳＭＩＴＨ</span>
+        </div>
+      </div>
+
+      <!-- 性別 -->
+      <div class="field">
+        <div class="field-label">性別<span class="asterisk">*</span></div>
+        <div class="radio-group">
+          <label class="radio-label">
+            <input type="radio" name="gender" value="male" checked> 男
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="gender" value="female"> 女
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="gender" value="none"> 回答なし
+          </label>
+        </div>
+      </div>
+
+      <!-- 住所 -->
+      <div class="field">
+        <div class="field-label">住所<span class="asterisk">*</span></div>
+        <div class="address-desc">住民票記載の通りに入力してください。</div>
+
+        <div class="pref-label">郵便番号</div>
+        <div class="zip-row">
+          <input class="zip-input" type="text" placeholder="" value="1050022" id="zip-input">
+          <button class="zip-search-btn">検索</button>
+        </div>
+        <div class="zip-hint">ハイフンなしで入力してください</div>
+
+        <div class="pref-label">都道府県</div>
+        <select class="pref-select" aria-label="都道府県">
+          <option>東京都</option>
+          <option>北海道</option>
+          <option>青森県</option>
+          <option>岩手県</option>
+          <option>宮城県</option>
+          <option>秋田県</option>
+          <option>山形県</option>
+          <option>福島県</option>
+          <option>茨城県</option>
+          <option>栃木県</option>
+          <option>群馬県</option>
+          <option>埼玉県</option>
+          <option>千葉県</option>
+          <option>神奈川県</option>
+          <option>新潟県</option>
+          <option>富山県</option>
+          <option>石川県</option>
+          <option>福井県</option>
+          <option>山梨県</option>
+          <option>長野県</option>
+          <option>岐阜県</option>
+          <option>静岡県</option>
+          <option>愛知県</option>
+          <option>三重県</option>
+          <option>滋賀県</option>
+          <option>京都府</option>
+          <option>大阪府</option>
+          <option>兵庫県</option>
+          <option>奈良県</option>
+          <option>和歌山県</option>
+          <option>鳥取県</option>
+          <option>島根県</option>
+          <option>岡山県</option>
+          <option>広島県</option>
+          <option>山口県</option>
+          <option>徳島県</option>
+          <option>香川県</option>
+          <option>愛媛県</option>
+          <option>高知県</option>
+          <option>福岡県</option>
+          <option>佐賀県</option>
+          <option>長崎県</option>
+          <option>熊本県</option>
+          <option>大分県</option>
+          <option>宮崎県</option>
+          <option>鹿児島県</option>
+          <option>沖縄県</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const nameInput = document.getElementById('name-input');
+    const charCount = document.getElementById('char-count');
+    nameInput.addEventListener('input', () => {
+      charCount.textContent = nameInput.value.length + '/30';
+    });
+  </script>
+</body>
+</html>

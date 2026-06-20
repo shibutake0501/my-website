@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ぴったりサービス - 引越し手続き</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'IBM Plex Sans JP', -apple-system, sans-serif;
+      background: #f4f4f8;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .page {
+      display: flex;
+      flex-direction: column;
+      width: 402px;
+      min-height: 100vh;
+      background: #fff;
+    }
+
+    /* ===== ヘッダー ===== */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 8px;
+      width: 402px;
+      height: 64px;
+      background: #fff;
+      border-bottom: 1px solid #E8E8EC;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      flex-shrink: 0;
+    }
+
+    .header-icon {
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #17181C;
+      border-radius: 8px;
+    }
+    .header-icon:hover { background: #f0f0f8; }
+
+    .header-title {
+      font-weight: 700;
+      font-size: 18px;
+      color: #171A1C;
+    }
+
+    /* ===== ステップバー ===== */
+    .step-bar {
+      padding: 12px 16px 0;
+      background: #fff;
+      flex-shrink: 0;
+    }
+
+    .step-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    .step-label {
+      font-size: 10px;
+      color: #8F99A3;
+      text-align: center;
+      flex: 1;
+      line-height: 1.3;
+    }
+
+    .step-label.active { color: #0017C1; font-weight: 700; }
+    .step-label.done { color: #0017C1; }
+
+    .step-track {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin-bottom: 12px;
+    }
+
+    .step-dot {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #E0E0E8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 700;
+      color: #8F99A3;
+      flex-shrink: 0;
+    }
+
+    .step-dot.active { background: #0017C1; color: #fff; }
+    .step-dot.done { background: #0017C1; color: #fff; }
+
+    .step-line {
+      flex: 1;
+      height: 2px;
+      background: #E0E0E8;
+    }
+
+    .step-line.done { background: #0017C1; }
+
+    /* ===== スクロールエリア ===== */
+    .scroll-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0 0 24px;
+    }
+
+    /* ===== パネル（各ステップ） ===== */
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* ===== セクション共通 ===== */
+    .section-block {
+      padding: 20px 16px 0;
+    }
+
+    .section-heading {
+      font-weight: 700;
+      font-size: 16px;
+      color: #171A1C;
+      margin-bottom: 4px;
+    }
+
+    .section-desc {
+      font-size: 14px;
+      color: #5C6670;
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+
+    /* ===== フォームフィールド ===== */
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 20px;
+    }
+
+    .field-label {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 700;
+      font-size: 16px;
+      color: #17181C;
+    }
+
+    .req { color: #C62828; font-size: 14px; }
+
+    .sub-label {
+      font-size: 12px;
+      color: #17181C;
+      margin-bottom: 2px;
+    }
+
+    .hint { font-size: 13px; color: #5C6670; line-height: 1.4; margin-top: 4px; }
+
+    input[type="text"],
+    input[type="tel"],
+    input[type="email"],
+    input[type="date"],
+    input[type="number"],
+    select,
+    textarea {
+      width: 100%;
+      height: 48px;
+      border: 1px solid #8F99A3;
+      border-radius: 4px;
+      padding: 0 12px;
+      font-family: 'IBM Plex Sans JP', sans-serif;
+      font-size: 16px;
+      color: #171A1C;
+      background: #fff;
+      outline: none;
+      appearance: none;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: #0017C1;
+      box-shadow: 0 0 0 2px rgba(0,23,193,0.12);
+    }
+
+    input.error, select.error {
+      border-color: #C62828;
+      background: #fff8f8;
+    }
+
+    .error-msg {
+      font-size: 12px;
+      color: #C62828;
+      margin-top: 2px;
+      display: none;
+    }
+
+    .error-msg.show { display: block; }
+
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23171A1C' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 36px;
+      cursor: pointer;
+    }
+
+    textarea { height: auto; padding: 12px; resize: none; }
+
+    /* ===== 行レイアウト ===== */
+    .row { display: flex; gap: 8px; }
+    .row > * { flex: 1; }
+
+    /* ===== 郵便番号行 ===== */
+    .zip-row { display: flex; gap: 8px; align-items: flex-start; }
+    .zip-row input { width: 200px; flex-shrink: 0; }
+    .zip-btn {
+      flex: 1;
+      height: 48px;
+      background: #fff;
+      border: 1px solid #0017C1;
+      border-radius: 999px;
+      font-family: 'IBM Plex Sans JP', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      color: #0017C1;
+      cursor: pointer;
+    }
+    .zip-btn:hover { background: #f0f0ff; }
+
+    /* ===== マイナンバーボックス ===== */
+    .mynumber-box {
+      background: rgba(0,23,193,0.1);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    .mynumber-box p { font-weight: 700; font-size: 15px; color: #17181C; margin-bottom: 12px; line-height: 1.5; }
+    .mynumber-btn {
+      width: 100%;
+      height: 52px;
+      background: #fff;
+      border: 1px solid #8F91A3;
+      border-radius: 999px;
+      font-family: 'IBM Plex Sans JP', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      color: #17181C;
+      cursor: pointer;
+    }
+    .mynumber-btn:hover { background: #f8f8ff; }
+
+    /* ===== ラジオ・チェック ===== */
+    .radio-group, .check-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .radio-group.horizontal { flex-direction: row; flex-wrap: wrap; }
+
+    .radio-item, .check-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 8px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 15px;
+      color: #17181C;
+    }
+    .radio-item:hover, .check-item:hover { background: #f4f4f8; }
+
+    .radio-item input[type="radio"],
+    .check-item input[type="checkbox"] {
+      width: 22px;
+      height: 22px;
+      flex-shrink: 0;
+      accent-color: #0017C1;
+      cursor: pointer;
+      margin: 0;
+      padding: 0;
+      border: none;
+      box-shadow: none;
+      background: none;
+    }
+
+    /* ===== 世帯員カード ===== */
+    .member-card {
+      border: 1px solid #D0D4E0;
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 12px;
+      position: relative;
+    }
+
+    .member-card-title {
+      font-weight: 700;
+      font-size: 14px;
+      color: #0017C1;
+      margin-bottom: 12px;
+    }
+
+    .remove-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 28px;
+      height: 28px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #8F99A3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+    .remove-btn:hover { background: #f0f0f8; color: #C62828; }
+
+    .add-member-btn {
+      width: 100%;
+      height: 44px;
+      background: #fff;
+      border: 1.5px dashed #0017C1;
+      border-radius: 8px;
+      font-family: 'IBM Plex Sans JP', sans-serif;
+      font-size: 15px;
+      color: #0017C1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .add-member-btn:hover { background: #f0f0ff; }
+
+    /* ===== 関連手続きカード ===== */
+    .procedure-card {
+      border: 1px solid #E0E0E8;
+      border-radius: 12px;
+      padding: 14px 14px 14px 14px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+    .procedure-card:hover { border-color: #0017C1; background: #f8f8ff; }
+    .procedure-card.selected { border-color: #0017C1; background: rgba(0,23,193,0.05); }
+
+    .procedure-card input[type="checkbox"] {
+      width: 22px;
+      height: 22px;
+      flex-shrink: 0;
+      accent-color: #0017C1;
+      cursor: pointer;
+      margin: 2px 0 0;
+      padding: 0;
+      border: none;
+      box-shadow: none;
+      background: none;
+    }
+
+    .procedure-info { flex: 1; }
+    .procedure-name { font-weight: 700; font-size: 15px; color: #17181C; margin-bottom: 2px; }
+    .procedure-desc { font-size: 13px; color: #5C6670; line-height: 1.4; }
+
+    /* ===== 確認画面 ===== */
+    .confirm-section {
+      margin-bottom: 20px;
+      border: 1px solid #E0E0E8;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .confirm-section-title {
+      background: #f0f0f8;
+      padding: 10px 14px;
+      font-weight: 700;
+      font-size: 14px;
+      color: #0017C1;
+    }
+
+    .confirm-row {
+      display: flex;
+      padding: 10px 14px;
+      border-top: 1px solid #f0f0f0;
+    }
+
+    .confirm-key {
+      width: 130px;
+      flex-shrink: 0;
+      font-size: 13px;
+      color: #5C6670;
+    }
+
+    .confirm-val {
+      flex: 1;
+      font-size: 14px;
+      color: #17181C;
+      word-break: break-all;
+    }
+
+    /* ===== 完了画面 ===== */
+    .complete-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 48px 24px 32px;
+      text-align: center;
+    }
+
+    .complete-icon {
+      width: 80px;
+      height: 80px;
+      background: rgba(0,23,193,0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .complete-title {
+      font-weight: 700;
+      font-size: 20px;
+      color: #17181C;
+      margin-bottom: 10px;
+    }
+
+    .complete-desc {
+      font-size: 15px;
+      color: #5C6670;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .receipt-box {
+      width: 100%;
+      background: #f4f4f8;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 24px;
+      text-align: left;
+    }
+
+    .receipt-label { font-size: 12px; color: #8F99A3; margin-bottom: 4px; }
+    .receipt-number { font-weight: 700; font-size: 22px; color: #0017C1; letter-spacing: 0.05em; }
+
+    /* ===== フッターボタン ===== */
+    .footer-btns {
+      padding: 12px 16px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: #fff;
+      border-top: 1px solid #E8E8EC;
+      flex-shrink: 0;
+    }
+
+    .btn-primary {
+      width: 100%;
+      height: 52px;
+      background: #0017C1;
+      border: none;
+      border-radius: 999px;
+      font-family: 'IBM Plex Sans JP', sans-serif;
+      font-weight: 700;
+      font-size: 16px;
+      color: #fff;
+      cursor: pointer;
+      box-shadow: 0 1px 3px 1px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.2);
+    }
+    .btn-primary:hover { background: #0011a0; }
+    .btn-primary:disabled { background: #8F99A3; cursor: not-allowed; box-shadow: none; }
+
+    .btn-secondary {
+      width: 100%;
+      height: 48px;
+      background: #fff;
+      border: 1px solid #8F99A3;
+      border-radius: 999px;
+      font-family: 'IBM Plex Sans JP', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      color: #5C6670;
+      cursor: pointer;
+    }
+    .btn-secondary:hover { background: #f4f4f8; }
+
+    /* ===== 区切り線 ===== */
+    .divider { height: 1px; background: #E8E8EC; margin: 4px 0 20px; }
+
+    /* ===== 必須マーク説明 ===== */
+    .req-note {
+      font-size: 13px;
+      color: #5C6670;
+      margin-bottom: 16px;
+    }
+    .req-note .req { font-size: 13px; }
+
+    /* ===== 一時保存バナー ===== */
+    .save-toast {
+      position: fixed;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #17181C;
+      color: #fff;
+      font-size: 14px;
+      padding: 10px 20px;
+      border-radius: 999px;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+      white-space: nowrap;
+      z-index: 200;
+    }
+    .save-toast.show { opacity: 1; }
+
+    /* ===== amount row ===== */
+    .amount-row { display: flex; align-items: center; gap: 6px; }
+    .amount-row input { flex: 1; }
+    .amount-unit { font-size: 15px; color: #17181C; white-space: nowrap; }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ヘッダー -->
+  <div class="header">
+    <div class="header-icon" id="back-btn" onclick="goBack()" aria-label="戻る">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+        <path d="m15 18-6-6 6-6"/>
+      </svg>
+    </div>
+    <div class="header-title">引越し手続きについて</div>
+    <div class="header-icon" onclick="saveDraft()" aria-label="一時保存" title="一時保存">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+        <polyline points="17 21 17 13 7 13 7 21"/>
+        <polyline points="7 3 7 8 15 8"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- ステップバー -->
+  <div class="step-bar" id="step-bar">
+    <div class="step-labels">
+      <div class="step-label active" id="sl1">申請者<br>情報</div>
+      <div class="step-label" id="sl2">転出・<br>転入</div>
+      <div class="step-label" id="sl3">世帯<br>情報</div>
+      <div class="step-label" id="sl4">関連<br>手続き</div>
+      <div class="step-label" id="sl5">確認</div>
+    </div>
+    <div class="step-track">
+      <div class="step-dot active" id="sd1">1</div>
+      <div class="step-line" id="line1"></div>
+      <div class="step-dot" id="sd2">2</div>
+      <div class="step-line" id="line2"></div>
+      <div class="step-dot" id="sd3">3</div>
+      <div class="step-line" id="line3"></div>
+      <div class="step-dot" id="sd4">4</div>
+      <div class="step-line" id="line4"></div>
+      <div class="step-dot" id="sd5">5</div>
+    </div>
+  </div>
+
+  <!-- スクロールエリア -->
+  <div class="scroll-area">
+
+    <!-- ===== STEP 1: 申請者情報 ===== -->
+    <div class="panel active" id="panel1">
+      <div class="section-block">
+        <div class="section-heading">申請者情報の入力</div>
+        <p class="req-note"><span class="req">*</span> がついている項目は必須入力です。</p>
+
+        <div class="mynumber-box">
+          <p>マイナンバーカードを使って、自動入力ができます。</p>
+          <button class="mynumber-btn" onclick="autoFill()">マイナンバーカードで自動入力</button>
+        </div>
+
+        <!-- 氏名 -->
+        <div class="field">
+          <div class="field-label">氏名（漢字またはアルファベット）<span class="req">*</span></div>
+          <input type="text" id="name" placeholder="山田　太郎" maxlength="30" oninput="updateCharCount()">
+          <div class="hint" style="display:flex; justify-content:space-between;">
+            <span>住民票記載の氏名を全角文字で入力してください。姓と名の間には空白を入れてください。</span>
+            <span id="char-count" style="white-space:nowrap; margin-left:8px;">0/30</span>
+          </div>
+          <div class="error-msg" id="err-name">氏名を入力してください</div>
+        </div>
+
+        <!-- 生年月日 -->
+        <div class="field">
+          <div class="field-label">生年月日<span class="req">*</span></div>
+          <input type="date" id="birthdate">
+          <div class="error-msg" id="err-birthdate">生年月日を入力してください</div>
+        </div>
+
+        <!-- 性別 -->
+        <div class="field">
+          <div class="field-label">性別<span class="req">*</span></div>
+          <div class="radio-group horizontal">
+            <label class="radio-item"><input type="radio" name="gender" value="男" checked><span>男</span></label>
+            <label class="radio-item"><input type="radio" name="gender" value="女"><span>女</span></label>
+            <label class="radio-item"><input type="radio" name="gender" value="回答なし"><span>回答なし</span></label>
+          </div>
+        </div>
+
+        <!-- 電話番号 -->
+        <div class="field">
+          <div class="field-label">電話番号<span class="req">*</span></div>
+          <input type="tel" id="phone" placeholder="0123456789">
+          <div class="hint">ハイフンなしで入力してください</div>
+          <div class="error-msg" id="err-phone">電話番号を入力してください</div>
+        </div>
+
+        <!-- メールアドレス -->
+        <div class="field">
+          <div class="field-label">メールアドレス</div>
+          <input type="email" id="email" placeholder="example@email.com">
+          <div class="hint">手続き完了通知を送信します（任意）</div>
+          <div class="error-msg" id="err-email">メールアドレスの形式が正しくありません</div>
+        </div>
+
+        <!-- マイナンバーカード番号 -->
+        <div class="field">
+          <div class="field-label">マイナンバーカード番号<span class="req">*</span></div>
+          <input type="text" id="mynumber" placeholder="1234-5678-9012" maxlength="14">
+          <div class="hint">12桁の個人番号を入力してください</div>
+          <div class="error-msg" id="err-mynumber">マイナンバーカード番号を入力してください</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== STEP 2: 転出・転入情報 ===== -->
+    <div class="panel" id="panel2">
+      <div class="section-block">
+        <div class="section-heading">転出・転入情報</div>
+        <p class="req-note"><span class="req">*</span> がついている項目は必須入力です。</p>
+
+        <!-- 区分 -->
+        <div class="field">
+          <div class="field-label">引越しの区分<span class="req">*</span></div>
+          <div class="radio-group">
+            <label class="radio-item"><input type="radio" name="move-type" value="city-in" checked onchange="toggleMoveFields()"><span>市内転居（千歳市内での引越し）</span></label>
+            <label class="radio-item"><input type="radio" name="move-type" value="from-out" onchange="toggleMoveFields()"><span>市外からの転入（他の市町村から千歳市へ）</span></label>
+            <label class="radio-item"><input type="radio" name="move-type" value="to-out" onchange="toggleMoveFields()"><span>市外への転出（千歳市から他の市町村へ）</span></label>
+          </div>
+        </div>
+
+        <!-- 引越し予定日 -->
+        <div class="field">
+          <div class="field-label">引越し予定日<span class="req">*</span></div>
+          <input type="date" id="move-date">
+          <div class="hint">引越し予定日を選択してください（今日以降の日付）</div>
+          <div class="error-msg" id="err-move-date">引越し予定日を入力してください</div>
+        </div>
+
+        <!-- 転出元住所 -->
+        <div class="field" id="field-from">
+          <div class="field-label">転出元住所（現住所）<span class="req">*</span></div>
+          <div class="sub-label">郵便番号</div>
+          <div class="zip-row">
+            <input type="text" id="from-zip" placeholder="0000000" style="width:180px; flex-shrink:0;" maxlength="7">
+            <button class="zip-btn" onclick="lookupZip('from')">住所検索</button>
+          </div>
+          <div class="sub-label" style="margin-top:8px;">都道府県</div>
+          <select id="from-pref">
+            <option value="">選択してください</option>
+            <option>北海道</option><option>青森県</option><option>岩手県</option><option>宮城県</option>
+            <option>秋田県</option><option>山形県</option><option>福島県</option><option>茨城県</option>
+            <option>栃木県</option><option>群馬県</option><option>埼玉県</option><option>千葉県</option>
+            <option>東京都</option><option>神奈川県</option><option>新潟県</option><option>富山県</option>
+            <option>石川県</option><option>福井県</option><option>山梨県</option><option>長野県</option>
+            <option>岐阜県</option><option>静岡県</option><option>愛知県</option><option>三重県</option>
+            <option>滋賀県</option><option>京都府</option><option>大阪府</option><option>兵庫県</option>
+            <option>奈良県</option><option>和歌山県</option><option>鳥取県</option><option>島根県</option>
+            <option>岡山県</option><option>広島県</option><option>山口県</option><option>徳島県</option>
+            <option>香川県</option><option>愛媛県</option><option>高知県</option><option>福岡県</option>
+            <option>佐賀県</option><option>長崎県</option><option>熊本県</option><option>大分県</option>
+            <option>宮崎県</option><option>鹿児島県</option><option>沖縄県</option>
+          </select>
+          <div class="sub-label" style="margin-top:8px;">市区町村</div>
+          <input type="text" id="from-city" placeholder="千歳市">
+          <div class="sub-label" style="margin-top:8px;">番地</div>
+          <input type="text" id="from-addr" placeholder="〇〇町1丁目2番地3号">
+          <div class="sub-label" style="margin-top:8px;">建物名（任意）</div>
+          <input type="text" id="from-bldg" placeholder="〇〇マンション101">
+          <div class="error-msg" id="err-from">転出元住所を入力してください</div>
+        </div>
+
+        <!-- 転入先住所 -->
+        <div class="field" id="field-to">
+          <div class="field-label">転入先住所（新住所）<span class="req">*</span></div>
+          <div class="sub-label">郵便番号</div>
+          <div class="zip-row">
+            <input type="text" id="to-zip" placeholder="0000000" style="width:180px; flex-shrink:0;" maxlength="7">
+            <button class="zip-btn" onclick="lookupZip('to')">住所検索</button>
+          </div>
+          <div class="sub-label" style="margin-top:8px;">都道府県</div>
+          <select id="to-pref">
+            <option value="">選択してください</option>
+            <option>北海道</option><option>青森県</option><option>岩手県</option><option>宮城県</option>
+            <option>秋田県</option><option>山形県</option><option>福島県</option><option>茨城県</option>
+            <option>栃木県</option><option>群馬県</option><option>埼玉県</option><option>千葉県</option>
+            <option>東京都</option><option>神奈川県</option><option>新潟県</option><option>富山県</option>
+            <option>石川県</option><option>福井県</option><option>山梨県</option><option>長野県</option>
+            <option>岐阜県</option><option>静岡県</option><option>愛知県</option><option>三重県</option>
+            <option>滋賀県</option><option>京都府</option><option>大阪府</option><option>兵庫県</option>
+            <option>奈良県</option><option>和歌山県</option><option>鳥取県</option><option>島根県</option>
+            <option>岡山県</option><option>広島県</option><option>山口県</option><option>徳島県</option>
+            <option>香川県</option><option>愛媛県</option><option>高知県</option><option>福岡県</option>
+            <option>佐賀県</option><option>長崎県</option><option>熊本県</option><option>大分県</option>
+            <option>宮崎県</option><option>鹿児島県</option><option>沖縄県</option>
+          </select>
+          <div class="sub-label" style="margin-top:8px;">市区町村</div>
+          <input type="text" id="to-city" placeholder="千歳市">
+          <div class="sub-label" style="margin-top:8px;">番地</div>
+          <input type="text" id="to-addr" placeholder="〇〇町1丁目2番地3号">
+          <div class="sub-label" style="margin-top:8px;">建物名（任意）</div>
+          <input type="text" id="to-bldg" placeholder="〇〇マンション101">
+          <div class="error-msg" id="err-to">転入先住所を入力してください</div>
+        </div>
+
+        <!-- 転出証明書アップロード（市外からの場合） -->
+        <div class="field" id="field-cert" style="display:none;">
+          <div class="field-label">転出証明書<span class="req">*</span></div>
+          <div style="border:1.5px dashed #8F99A3; border-radius:8px; padding:20px; text-align:center; cursor:pointer; background:#fafafa;" onclick="document.getElementById('cert-file').click()">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#8F99A3" stroke-width="1.5" style="margin-bottom:8px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <p style="font-size:14px; color:#5C6670;">タップしてファイルを選択</p>
+            <p style="font-size:12px; color:#8F99A3; margin-top:4px;">PDF・JPG・PNG（最大10MB）</p>
+            <input type="file" id="cert-file" style="display:none;" accept=".pdf,.jpg,.jpeg,.png" onchange="showFileName(this)">
+          </div>
+          <div id="cert-filename" style="font-size:13px; color:#0017C1; margin-top:6px;"></div>
+          <div class="error-msg" id="err-cert">転出証明書をアップロードしてください</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ===== STEP 3: 世帯情報 ===== -->
+    <div class="panel" id="panel3">
+      <div class="section-block">
+        <div class="section-heading">世帯情報の入力</div>
+        <p class="req-note"><span class="req">*</span> がついている項目は必須入力です。</p>
+
+        <!-- 世帯主 -->
+        <div class="field">
+          <div class="field-label">世帯主<span class="req">*</span></div>
+          <div class="radio-group">
+            <label class="radio-item"><input type="radio" name="head-type" value="self" checked onchange="toggleHeadName()"><span>申請者本人（自分が世帯主）</span></label>
+            <label class="radio-item"><input type="radio" name="head-type" value="other" onchange="toggleHeadName()"><span>他の家族が世帯主</span></label>
+          </div>
+        </div>
+
+        <!-- 世帯主氏名（他の家族の場合） -->
+        <div class="field" id="field-head-name" style="display:none;">
+          <div class="field-label">世帯主の氏名<span class="req">*</span></div>
+          <input type="text" id="head-name" placeholder="山田　花子">
+          <div class="field-label" style="margin-top:12px; font-size:14px; font-weight:400;">世帯主との続柄<span class="req">*</span></div>
+          <select id="head-relation" style="margin-top:4px;">
+            <option value="">選択してください</option>
+            <option>夫・妻</option><option>父・母</option><option>子</option>
+            <option>祖父・祖母</option><option>兄弟・姉妹</option><option>その他</option>
+          </select>
+          <div class="error-msg" id="err-head">世帯主情報を入力してください</div>
+        </div>
+
+        <!-- 世帯員 -->
+        <div class="field">
+          <div class="field-label">転居する世帯員<span class="req">*</span></div>
+          <p class="hint" style="margin-bottom:12px;">申請者本人を含む、転居する全員を登録してください。</p>
+          <div id="members-list">
+            <div class="member-card" id="member-0">
+              <div class="member-card-title">世帯員 1（申請者本人）</div>
+              <div class="sub-label">氏名</div>
+              <input type="text" class="member-name" placeholder="山田　太郎" style="margin-bottom:8px;">
+              <div class="row">
+                <div>
+                  <div class="sub-label">生年月日</div>
+                  <input type="date" class="member-birth">
+                </div>
+                <div>
+                  <div class="sub-label">続柄</div>
+                  <select class="member-rel">
+                    <option>本人</option><option>配偶者</option><option>子</option>
+                    <option>父・母</option><option>その他</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="add-member-btn" onclick="addMember()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            世帯員を追加する
+          </button>
+          <div class="error-msg" id="err-members" style="margin-top:8px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== STEP 4: 関連手続き ===== -->
+    <div class="panel" id="panel4">
+      <div class="section-block">
+        <div class="section-heading">関連手続きの選択</div>
+        <p class="section-desc">引越しと同時に申請できる手続きを選択してください（任意）。チェックした手続きは、この後まとめて申請できます。</p>
+
+        <div class="procedure-card" onclick="toggleProcedure(this)">
+          <input type="checkbox" name="proc" value="kokuho">
+          <div class="procedure-info">
+            <div class="procedure-name">国民健康保険の住所変更</div>
+            <div class="procedure-desc">加入中の国民健康保険証の住所を新住所に変更します。</div>
+          </div>
+        </div>
+
+        <div class="procedure-card" onclick="toggleProcedure(this)">
+          <input type="checkbox" name="proc" value="nenkin">
+          <div class="procedure-info">
+            <div class="procedure-name">国民年金の住所変更</div>
+            <div class="procedure-desc">国民年金に関する住所情報を更新します。</div>
+          </div>
+        </div>
+
+        <div class="procedure-card" onclick="toggleProcedure(this)">
+          <input type="checkbox" name="proc" value="jidou">
+          <div class="procedure-info">
+            <div class="procedure-name">児童手当の住所変更</div>
+            <div class="procedure-desc">児童手当の受給先住所を新住所に変更します。</div>
+          </div>
+        </div>
+
+        <div class="procedure-card" onclick="toggleProcedure(this)">
+          <input type="checkbox" name="proc" value="inkan">
+          <div class="procedure-info">
+            <div class="procedure-name">印鑑登録の廃止・新規登録</div>
+            <div class="procedure-desc">転出元の印鑑登録を廃止し、転入先で新規登録を行います。</div>
+          </div>
+        </div>
+
+        <div class="procedure-card" onclick="toggleProcedure(this)">
+          <input type="checkbox" name="proc" value="shougai">
+          <div class="procedure-info">
+            <div class="procedure-name">障害者手帳の住所変更</div>
+            <div class="procedure-desc">障害者手帳に記載の住所を新住所に変更します。</div>
+          </div>
+        </div>
+
+        <div class="procedure-card" onclick="toggleProcedure(this)">
+          <input type="checkbox" name="proc" value="inu">
+          <div class="procedure-info">
+            <div class="procedure-name">犬の登録住所変更</div>
+            <div class="procedure-desc">飼育している犬の登録住所を変更します。</div>
+          </div>
+        </div>
+
+        <p style="font-size:13px; color:#8F99A3; margin-top:12px;">※ 選択した手続きについては、後日担当窓口よりご連絡する場合があります。</p>
+      </div>
+    </div>
+
+    <!-- ===== STEP 5: 確認画面 ===== -->
+    <div class="panel" id="panel5">
+      <div class="section-block">
+        <div class="section-heading">入力内容の確認</div>
+        <p class="section-desc">以下の内容で申請します。内容をご確認ください。</p>
+
+        <div class="confirm-section">
+          <div class="confirm-section-title">申請者情報</div>
+          <div class="confirm-row"><div class="confirm-key">氏名</div><div class="confirm-val" id="c-name">—</div></div>
+          <div class="confirm-row"><div class="confirm-key">生年月日</div><div class="confirm-val" id="c-birth">—</div></div>
+          <div class="confirm-row"><div class="confirm-key">性別</div><div class="confirm-val" id="c-gender">—</div></div>
+          <div class="confirm-row"><div class="confirm-key">電話番号</div><div class="confirm-val" id="c-phone">—</div></div>
+          <div class="confirm-row"><div class="confirm-key">メールアドレス</div><div class="confirm-val" id="c-email">—</div></div>
+        </div>
+
+        <div class="confirm-section">
+          <div class="confirm-section-title">転出・転入情報</div>
+          <div class="confirm-row"><div class="confirm-key">引越し区分</div><div class="confirm-val" id="c-movetype">—</div></div>
+          <div class="confirm-row"><div class="confirm-key">引越し予定日</div><div class="confirm-val" id="c-movedate">—</div></div>
+          <div class="confirm-row"><div class="confirm-key">転出元住所</div><div class="confirm-val" id="c-from">—</div></div>
+          <div class="confirm-row"><div class="confirm-key">転入先住所</div><div class="confirm-val" id="c-to">—</div></div>
+        </div>
+
+        <div class="confirm-section">
+          <div class="confirm-section-title">世帯情報</div>
+          <div class="confirm-row"><div class="confirm-key">世帯主</div><div class="confirm-val" id="c-head">—</div></div>
+          <div class="confirm-row"><div class="confirm-key">世帯員数</div><div class="confirm-val" id="c-members">—</div></div>
+        </div>
+
+        <div class="confirm-section">
+          <div class="confirm-section-title">関連手続き</div>
+          <div class="confirm-row"><div class="confirm-key">選択した手続き</div><div class="confirm-val" id="c-procs">なし</div></div>
+        </div>
+
+        <div style="background:#fff8e0; border-radius:10px; padding:14px; margin-top:4px; margin-bottom:8px;">
+          <p style="font-size:13px; color:#7a5800; line-height:1.6;">
+            申請後の内容変更は窓口での手続きが必要になります。入力内容をよくご確認のうえ、送信してください。
+          </p>
+        </div>
+
+        <label class="check-item" style="padding:12px 0;">
+          <input type="checkbox" id="agree-check" onchange="toggleSubmit()" style="width:22px;height:22px;accent-color:#0017C1;margin:0;padding:0;border:none;box-shadow:none;background:none;">
+          <span style="font-size:14px; color:#17181C;">上記の内容を確認し、申請に同意します</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- ===== STEP 6: 完了 ===== -->
+    <div class="panel" id="panel6">
+      <div class="complete-screen">
+        <div class="complete-icon">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#0017C1" stroke-width="2.5">
+            <path d="M20 6 9 17l-5-5"/>
+          </svg>
+        </div>
+        <div class="complete-title">申請が完了しました</div>
+        <div class="complete-desc">
+          引越し手続きの申請を受け付けました。<br>
+          受付番号は以下をご確認ください。<br>
+          内容確認後、ご登録のメールアドレスへご連絡します。
+        </div>
+        <div class="receipt-box">
+          <div class="receipt-label">受付番号</div>
+          <div class="receipt-number" id="receipt-number">—</div>
+          <div style="font-size:12px; color:#8F99A3; margin-top:8px;" id="receipt-date">—</div>
+        </div>
+        <div style="font-size:13px; color:#5C6670; line-height:1.7; text-align:left; width:100%;">
+          <p>📋 <strong>次のステップ</strong></p>
+          <p style="margin-top:6px;">・手続きの状況はアプリのトップ画面からご確認いただけます。</p>
+          <p>・転入後14日以内に住民票の手続きが必要です。</p>
+          <p>・ご不明な点は市民窓口（0123-XX-XXXX）へお問い合わせください。</p>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /scroll-area -->
+
+  <!-- フッターボタン -->
+  <div class="footer-btns" id="footer-btns">
+    <button class="btn-primary" id="next-btn" onclick="goNext()">次へ進む</button>
+    <button class="btn-secondary" id="back-step-btn" onclick="goBack()" style="display:none;">前のステップに戻る</button>
+  </div>
+
+</div><!-- /page -->
+
+<div class="save-toast" id="save-toast">一時保存しました</div>
+
+<script>
+  let currentStep = 1;
+  const TOTAL_STEPS = 5;
+  let memberCount = 1;
+
+  // ===== ステップ制御 =====
+  function goNext() {
+    if (currentStep <= TOTAL_STEPS) {
+      if (!validateStep(currentStep)) return;
+      if (currentStep === TOTAL_STEPS) {
+        buildConfirm();
+        showStep(6);
+        return;
+      }
+      showStep(currentStep + 1);
+    }
+  }
+
+  function goBack() {
+    if (currentStep <= 1) return;
+    if (currentStep === 6) { showStep(5); return; }
+    showStep(currentStep - 1);
+  }
+
+  function showStep(n) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel' + n).classList.add('active');
+    currentStep = n;
+    updateStepUI();
+    document.querySelector('.scroll-area').scrollTop = 0;
+  }
+
+  function updateStepUI() {
+    // ステップバー
+    const bar = document.getElementById('step-bar');
+    bar.style.display = currentStep === 6 ? 'none' : 'block';
+
+    for (let i = 1; i <= 5; i++) {
+      const dot = document.getElementById('sd' + i);
+      const lbl = document.getElementById('sl' + i);
+      dot.className = 'step-dot';
+      lbl.className = 'step-label';
+      if (i < currentStep) { dot.classList.add('done'); dot.innerHTML = '✓'; lbl.classList.add('done'); }
+      else if (i === currentStep) { dot.classList.add('active'); dot.innerHTML = i; lbl.classList.add('active'); }
+      else { dot.innerHTML = i; }
+    }
+    for (let i = 1; i <= 4; i++) {
+      const line = document.getElementById('line' + i);
+      line.className = 'step-line' + (i < currentStep ? ' done' : '');
+    }
+
+    // フッター
+    const nextBtn = document.getElementById('next-btn');
+    const backBtn = document.getElementById('back-step-btn');
+    const footer = document.getElementById('footer-btns');
+
+    if (currentStep === 6) {
+      footer.innerHTML = '<button class="btn-primary" onclick="location.reload()">トップに戻る</button>';
+      return;
+    }
+
+    backBtn.style.display = currentStep > 1 ? 'block' : 'none';
+    if (currentStep === 5) { nextBtn.textContent = '申請する'; nextBtn.disabled = !document.getElementById('agree-check').checked; }
+    else { nextBtn.textContent = '次へ進む'; nextBtn.disabled = false; }
+  }
+
+  // ===== バリデーション =====
+  function validateStep(step) {
+    let ok = true;
+
+    function showErr(id, show) {
+      const el = document.getElementById(id);
+      if (el) { el.classList.toggle('show', show); }
+    }
+    function markField(id, error) {
+      const el = document.getElementById(id);
+      if (el) { el.classList.toggle('error', error); }
+    }
+
+    if (step === 1) {
+      const name = document.getElementById('name').value.trim();
+      showErr('err-name', !name); markField('name', !name);
+      if (!name) ok = false;
+
+      const birth = document.getElementById('birthdate').value;
+      showErr('err-birthdate', !birth); markField('birthdate', !birth);
+      if (!birth) ok = false;
+
+      const phone = document.getElementById('phone').value.trim();
+      const phoneOk = /^\d{10,11}$/.test(phone);
+      showErr('err-phone', !phoneOk); markField('phone', !phoneOk);
+      if (!phoneOk) ok = false;
+
+      const email = document.getElementById('email').value.trim();
+      if (email) {
+        const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        showErr('err-email', !emailOk); markField('email', !emailOk);
+        if (!emailOk) ok = false;
+      } else {
+        showErr('err-email', false); markField('email', false);
+      }
+
+      const mn = document.getElementById('mynumber').value.trim().replace(/-/g, '');
+      const mnOk = mn.length === 12;
+      showErr('err-mynumber', !mnOk); markField('mynumber', !mnOk);
+      if (!mnOk) ok = false;
+    }
+
+    if (step === 2) {
+      const moveDate = document.getElementById('move-date').value;
+      const today = new Date().toISOString().split('T')[0];
+      const dateOk = moveDate && moveDate >= today;
+      showErr('err-move-date', !dateOk); markField('move-date', !dateOk);
+      if (!dateOk) ok = false;
+
+      const fromCity = document.getElementById('from-city').value.trim();
+      const fromAddr = document.getElementById('from-addr').value.trim();
+      const fromOk = fromCity && fromAddr;
+      showErr('err-from', !fromOk);
+      if (!fromOk) ok = false;
+
+      const toCity = document.getElementById('to-city').value.trim();
+      const toAddr = document.getElementById('to-addr').value.trim();
+      const toOk = toCity && toAddr;
+      showErr('err-to', !toOk);
+      if (!toOk) ok = false;
+    }
+
+    if (step === 3) {
+      const names = document.querySelectorAll('.member-name');
+      let membOk = true;
+      names.forEach(n => { if (!n.value.trim()) membOk = false; });
+      showErr('err-members', !membOk);
+      if (!membOk) { document.getElementById('err-members').textContent = '全ての世帯員の氏名を入力してください'; ok = false; }
+    }
+
+    return ok;
+  }
+
+  // ===== 確認画面 =====
+  function buildConfirm() {
+    const moveTypeMap = { 'city-in':'市内転居', 'from-out':'市外からの転入', 'to-out':'市外への転出' };
+    const moveType = document.querySelector('input[name="move-type"]:checked')?.value || '';
+
+    document.getElementById('c-name').textContent = document.getElementById('name').value || '—';
+    document.getElementById('c-birth').textContent = document.getElementById('birthdate').value || '—';
+    document.getElementById('c-gender').textContent = document.querySelector('input[name="gender"]:checked')?.value || '—';
+    document.getElementById('c-phone').textContent = document.getElementById('phone').value || '—';
+    document.getElementById('c-email').textContent = document.getElementById('email').value || '（未入力）';
+    document.getElementById('c-movetype').textContent = moveTypeMap[moveType] || '—';
+    document.getElementById('c-movedate').textContent = document.getElementById('move-date').value || '—';
+
+    const fromPref = document.getElementById('from-pref').value;
+    const fromCity = document.getElementById('from-city').value;
+    const fromAddr = document.getElementById('from-addr').value;
+    document.getElementById('c-from').textContent = [fromPref, fromCity, fromAddr].filter(Boolean).join(' ') || '—';
+
+    const toPref = document.getElementById('to-pref').value;
+    const toCity = document.getElementById('to-city').value;
+    const toAddr = document.getElementById('to-addr').value;
+    document.getElementById('c-to').textContent = [toPref, toCity, toAddr].filter(Boolean).join(' ') || '—';
+
+    const headType = document.querySelector('input[name="head-type"]:checked')?.value;
+    document.getElementById('c-head').textContent = headType === 'self' ? '申請者本人' : (document.getElementById('head-name').value || '—');
+    document.getElementById('c-members').textContent = document.querySelectorAll('.member-card').length + ' 名';
+
+    const procs = Array.from(document.querySelectorAll('input[name="proc"]:checked'))
+      .map(cb => cb.closest('.procedure-card').querySelector('.procedure-name').textContent);
+    document.getElementById('c-procs').textContent = procs.length ? procs.join('、') : 'なし';
+  }
+
+  // ===== 申請完了 =====
+  function submitForm() {
+    const receiptNum = 'CHT-' + new Date().getFullYear() + '-' + String(Math.floor(Math.random() * 900000) + 100000);
+    document.getElementById('receipt-number').textContent = receiptNum;
+    const now = new Date();
+    document.getElementById('receipt-date').textContent = '受付日時：' + now.toLocaleDateString('ja-JP') + ' ' + now.toLocaleTimeString('ja-JP', {hour:'2-digit', minute:'2-digit'});
+    showStep(6);
+  }
+
+  // ===== 世帯員追加 =====
+  function addMember() {
+    memberCount++;
+    const idx = memberCount - 1;
+    const card = document.createElement('div');
+    card.className = 'member-card';
+    card.id = 'member-' + idx;
+    card.innerHTML = `
+      <div class="member-card-title">世帯員 ${memberCount}</div>
+      <button class="remove-btn" onclick="removeMember(${idx})" aria-label="削除">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <div class="sub-label">氏名</div>
+      <input type="text" class="member-name" placeholder="山田　花子" style="margin-bottom:8px;">
+      <div class="row">
+        <div><div class="sub-label">生年月日</div><input type="date" class="member-birth"></div>
+        <div><div class="sub-label">続柄</div><select class="member-rel"><option>配偶者</option><option>子</option><option>父・母</option><option>兄弟・姉妹</option><option>その他</option></select></div>
+      </div>`;
+    document.getElementById('members-list').appendChild(card);
+  }
+
+  function removeMember(idx) {
+    const card = document.getElementById('member-' + idx);
+    if (card) card.remove();
+  }
+
+  // ===== 条件分岐表示 =====
+  function toggleMoveFields() {
+    const type = document.querySelector('input[name="move-type"]:checked')?.value;
+    document.getElementById('field-cert').style.display = (type === 'from-out') ? 'block' : 'none';
+  }
+
+  function toggleHeadName() {
+    const type = document.querySelector('input[name="head-type"]:checked')?.value;
+    document.getElementById('field-head-name').style.display = (type === 'other') ? 'block' : 'none';
+  }
+
+  function toggleSubmit() {
+    const checked = document.getElementById('agree-check').checked;
+    document.getElementById('next-btn').disabled = !checked;
+  }
+
+  // ===== 関連手続きカードクリック =====
+  function toggleProcedure(card) {
+    const cb = card.querySelector('input[type="checkbox"]');
+    if (event.target !== cb) cb.checked = !cb.checked;
+    card.classList.toggle('selected', cb.checked);
+  }
+
+  // ===== 郵便番号検索（デモ） =====
+  function lookupZip(dir) {
+    const zip = document.getElementById(dir + '-zip').value.replace(/-/g, '');
+    if (zip.length !== 7) { alert('郵便番号を7桁で入力してください'); return; }
+    // デモ用ダミーデータ
+    const demo = { '0660011': ['北海道', '千歳市', '千代田町'] };
+    const data = demo[zip] || ['北海道', '千歳市', '〇〇町'];
+    document.getElementById(dir + '-pref').value = data[0];
+    document.getElementById(dir + '-city').value = data[1];
+    document.getElementById(dir + '-addr').value = data[2];
+  }
+
+  // ===== 文字数カウント =====
+  function updateCharCount() {
+    const val = document.getElementById('name').value;
+    document.getElementById('char-count').textContent = val.length + '/30';
+  }
+
+  // ===== 自動入力デモ =====
+  function autoFill() {
+    document.getElementById('name').value = '山田　太郎';
+    document.getElementById('birthdate').value = '1985-04-15';
+    document.getElementById('phone').value = '09012345678';
+    document.getElementById('mynumber').value = '1234-5678-9012';
+    document.querySelector('input[name="gender"][value="男"]').checked = true;
+    updateCharCount();
+    alert('マイナンバーカードから情報を読み取りました。（デモ）');
+  }
+
+  // ===== ファイル名表示 =====
+  function showFileName(input) {
+    const name = input.files[0]?.name || '';
+    document.getElementById('cert-filename').textContent = name ? '選択済み：' + name : '';
+  }
+
+  // ===== 一時保存 =====
+  function saveDraft() {
+    const toast = document.getElementById('save-toast');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2000);
+  }
+
+  // ===== next-btn で最終ステップは submitForm =====
+  document.getElementById('next-btn').addEventListener('click', function() {
+    if (currentStep === 5 && !this.disabled) {
+      if (!validateStep(5)) return;
+      submitForm();
+    }
+  }, true);
+
+  // 初期化
+  updateStepUI();
+</script>
+</body>
+</html>

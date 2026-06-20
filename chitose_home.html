@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>千歳市アプリ</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic', sans-serif;
+      background: #f4f4f8;
+      display: flex;
+      justify-content: center;
+    }
+
+    .page {
+      width: 390px;
+      min-height: 100vh;
+      background: #f4f4f8;
+      position: relative;
+      padding-bottom: 80px;
+    }
+
+    /* ヘッダー */
+    .header {
+      background: #fff;
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header-icon {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #333;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logo-bird {
+      width: 44px;
+      height: 44px;
+    }
+
+    .logo-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+
+    .logo-text .city-name {
+      font-size: 18px;
+      font-weight: 700;
+      color: #111;
+    }
+
+    .logo-text .city-en {
+      font-size: 10px;
+      color: #666;
+      letter-spacing: 0.05em;
+    }
+
+    .bell-wrap {
+      position: relative;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .bell-dot {
+      width: 8px;
+      height: 8px;
+      background: #e63333;
+      border-radius: 50%;
+      position: absolute;
+      top: 4px;
+      right: 4px;
+    }
+
+    /* カルーセル */
+    .carousel-wrap {
+      background: #fff;
+      padding: 0 0 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .carousel-slide {
+      position: relative;
+      width: 100%;
+    }
+
+    .carousel-img {
+      width: 100%;
+      height: 180px;
+      background: linear-gradient(160deg, #1a3a8a 0%, #2a5acd 50%, #4a7ae8 100%);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    /* 街のシルエット */
+    .city-scene {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 140px;
+    }
+
+    .detail-badge {
+      position: absolute;
+      top: 12px;
+      right: 14px;
+      background: rgba(255,255,255,0.22);
+      color: #fff;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+    }
+
+    .carousel-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 32px;
+      height: 32px;
+      background: rgba(255,255,255,0.85);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 2;
+      border: none;
+    }
+
+    .carousel-arrow.left { left: 10px; margin-top: -20px; }
+    .carousel-arrow.right { right: 10px; margin-top: -20px; }
+
+    .carousel-card {
+      margin: 0 16px;
+      background: #fff;
+      border-radius: 14px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+      margin-top: -20px;
+      position: relative;
+      z-index: 3;
+    }
+
+    .card-check {
+      width: 32px;
+      height: 32px;
+      background: #2d2dcc;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .card-info {}
+
+    .card-sub {
+      font-size: 11px;
+      color: #2d2dcc;
+      margin-bottom: 2px;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #111;
+    }
+
+    .dots {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      padding-top: 14px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ccc;
+    }
+
+    .dot.active {
+      background: #2d2dcc;
+      width: 10px;
+      height: 10px;
+    }
+
+    /* セクション共通 */
+    .section {
+      margin: 10px 14px 0;
+      background: #eeeef8;
+      border-radius: 16px;
+      padding: 16px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #111;
+    }
+
+    .see-all-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #2d2dcc;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 20px;
+      border: none;
+      cursor: pointer;
+    }
+
+    /* ミニアプリグリッド */
+    .mini-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .mini-app {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    .mini-icon {
+      width: 58px;
+      height: 58px;
+      background: #fff;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #2d2dcc;
+    }
+
+    .mini-label {
+      font-size: 11px;
+      color: #333;
+      text-align: center;
+      line-height: 1.3;
+    }
+
+    /* トピックス */
+    .topic-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+    }
+
+    .topic-card:last-child {
+      margin-bottom: 0;
+    }
+
+    .topic-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .topic-badge {
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-weight: 500;
+    }
+
+    .badge-boc { background: #fff0e0; color: #b05000; }
+    .badge-info { background: #e0eaff; color: #1a40aa; }
+    .badge-green { background: #e0f4e8; color: #1a7a3a; }
+
+    .topic-date {
+      font-size: 12px;
+      color: #888;
+    }
+
+    .topic-title {
+      font-size: 14px;
+      color: #111;
+      line-height: 1.5;
+    }
+
+    /* ボトムナビ */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 390px;
+      background: #fff;
+      border-top: 0.5px solid #ddd;
+      display: flex;
+      padding: 8px 0 20px;
+      z-index: 100;
+    }
+
+    .nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      padding: 4px 0;
+      position: relative;
+    }
+
+    .nav-icon {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #999;
+    }
+
+    .nav-icon.active {
+      color: #fff;
+      background: #2d2dcc;
+      border-radius: 10px;
+      padding: 4px;
+      width: 40px;
+      height: 36px;
+    }
+
+    .nav-badge {
+      width: 8px;
+      height: 8px;
+      background: #e63333;
+      border-radius: 50%;
+      position: absolute;
+      top: 2px;
+      right: 50px;
+    }
+
+    .nav-label {
+      font-size: 11px;
+      color: #999;
+    }
+
+    .nav-label.active {
+      color: #2d2dcc;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ヘッダー -->
+  <div class="header">
+    <div class="header-icon" aria-label="メニュー">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <line x1="3" y1="12" x2="21" y2="12"/>
+        <line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </div>
+    <div class="logo">
+      <!-- 千歳市ロゴ（鳥のシルエット） -->
+      <svg class="logo-bird" viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="25" cy="25" rx="22" ry="22" fill="#cc1111"/>
+        <g fill="#fff">
+          <!-- 鳥のシルエット -->
+          <path d="M14 30 Q18 18 25 16 Q30 14 34 18 Q38 22 36 28 Q33 22 26 22 Q20 24 18 30 Z"/>
+          <path d="M18 30 Q22 26 26 26 Q30 26 32 30 Q28 28 25 28 Q21 28 18 30 Z"/>
+          <path d="M25 16 Q28 10 34 8 Q32 14 28 16 Z"/>
+        </g>
+      </svg>
+      <div class="logo-text">
+        <span class="city-name">千歳市</span>
+        <span class="city-en">City of Chitose</span>
+      </div>
+    </div>
+    <div class="bell-wrap" aria-label="通知">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2">
+        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+      </svg>
+      <div class="bell-dot"></div>
+    </div>
+  </div>
+
+  <!-- カルーセル -->
+  <div class="carousel-wrap">
+    <div class="carousel-slide">
+      <!-- 街のイラスト -->
+      <div class="carousel-img">
+        <div class="detail-badge">
+          詳細
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="m9 18 6-6-6-6"/></svg>
+        </div>
+        <svg class="city-scene" viewBox="0 0 390 140" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMax meet">
+          <!-- 飛行機 -->
+          <g transform="translate(60,20)" fill="rgba(255,255,255,0.7)">
+            <path d="M0 8 L30 4 L36 8 L30 12 Z"/>
+            <path d="M18 4 L24 0 L26 4 Z"/>
+            <path d="M6 12 L10 16 L14 12 Z"/>
+          </g>
+          <!-- 空 背景 -->
+          <rect width="390" height="140" fill="transparent"/>
+          <!-- 雲 -->
+          <ellipse cx="60" cy="30" rx="28" ry="14" fill="rgba(255,255,255,0.25)"/>
+          <ellipse cx="80" cy="22" rx="20" ry="12" fill="rgba(255,255,255,0.2)"/>
+          <ellipse cx="300" cy="40" rx="24" ry="12" fill="rgba(255,255,255,0.2)"/>
+          <!-- 遠景ビル群 -->
+          <rect x="30" y="80" width="18" height="60" fill="rgba(255,255,255,0.15)" rx="2"/>
+          <rect x="52" y="65" width="22" height="75" fill="rgba(255,255,255,0.2)" rx="2"/>
+          <rect x="78" y="72" width="16" height="68" fill="rgba(255,255,255,0.15)" rx="2"/>
+          <!-- タワー（テレビ塔） -->
+          <polygon points="185,20 190,140 180,140" fill="rgba(255,255,255,0.35)"/>
+          <rect x="183" y="28" width="4" height="6" fill="rgba(255,255,255,0.5)" rx="1"/>
+          <rect x="181" y="44" width="8" height="4" fill="rgba(255,255,255,0.4)" rx="1"/>
+          <!-- 中景ビル -->
+          <rect x="110" y="60" width="30" height="80" fill="rgba(255,255,255,0.18)" rx="2"/>
+          <rect x="144" y="50" width="26" height="90" fill="rgba(255,255,255,0.22)" rx="2"/>
+          <rect x="200" y="55" width="28" height="85" fill="rgba(255,255,255,0.18)" rx="2"/>
+          <rect x="232" y="68" width="22" height="72" fill="rgba(255,255,255,0.15)" rx="2"/>
+          <!-- 右側ビル -->
+          <rect x="270" y="62" width="24" height="78" fill="rgba(255,255,255,0.2)" rx="2"/>
+          <rect x="298" y="74" width="20" height="66" fill="rgba(255,255,255,0.15)" rx="2"/>
+          <rect x="322" y="58" width="28" height="82" fill="rgba(255,255,255,0.18)" rx="2"/>
+          <rect x="354" y="70" width="22" height="70" fill="rgba(255,255,255,0.15)" rx="2"/>
+          <!-- 地面 -->
+          <rect x="0" y="130" width="390" height="10" fill="rgba(255,255,255,0.1)"/>
+          <!-- 木 -->
+          <circle cx="100" cy="118" r="10" fill="rgba(100,200,120,0.5)"/>
+          <rect x="98" y="124" width="4" height="16" fill="rgba(100,160,80,0.4)"/>
+          <circle cx="265" cy="120" r="8" fill="rgba(100,200,120,0.5)"/>
+          <rect x="263" y="125" width="4" height="15" fill="rgba(100,160,80,0.4)"/>
+          <!-- 窓ライト -->
+          <rect x="116" y="66" width="4" height="4" fill="rgba(255,240,180,0.6)" rx="1"/>
+          <rect x="124" y="66" width="4" height="4" fill="rgba(255,240,180,0.6)" rx="1"/>
+          <rect x="116" y="76" width="4" height="4" fill="rgba(255,240,180,0.6)" rx="1"/>
+          <rect x="148" y="58" width="4" height="4" fill="rgba(255,240,180,0.6)" rx="1"/>
+          <rect x="156" y="58" width="4" height="4" fill="rgba(255,240,180,0.6)" rx="1"/>
+          <rect x="204" y="62" width="4" height="4" fill="rgba(255,240,180,0.6)" rx="1"/>
+          <rect x="212" y="62" width="4" height="4" fill="rgba(255,240,180,0.6)" rx="1"/>
+          <rect x="276" y="68" width="4" height="4" fill="rgba(255,240,180,0.6)" rx="1"/>
+          <rect x="284" y="68" width="4" height="4" fill="rgba(255,240,180,0.6)" rx="1"/>
+        </svg>
+      </div>
+      <button class="carousel-arrow left" aria-label="前へ">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg>
+      </button>
+      <button class="carousel-arrow right" aria-label="次へ">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
+    </div>
+
+    <div class="carousel-card">
+      <div class="card-check" aria-label="本人確認済">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>
+      </div>
+      <div class="card-info">
+        <div class="card-sub">本人確認済</div>
+        <div class="card-title">千歳市デジタル市民証</div>
+      </div>
+    </div>
+
+    <div class="dots">
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot active"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
+  </div>
+
+  <!-- ミニアプリ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">広がるミニアプリ</div>
+      <button class="see-all-btn">
+        すべて見る
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="m9 18 6-6-6-6"/></svg>
+      </button>
+    </div>
+    <div class="mini-grid">
+      <!-- ごみカレンダー -->
+      <div class="mini-app">
+        <div class="mini-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/>
+            <line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/>
+            <rect x="7" y="13" width="3" height="3" rx="0.5"/><rect x="14" y="13" width="3" height="3" rx="0.5"/>
+          </svg>
+        </div>
+        <div class="mini-label">ごみカレン<br>ダー</div>
+      </div>
+      <!-- 電子申請 -->
+      <div class="mini-app">
+        <div class="mini-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <rect x="5" y="2" width="14" height="20" rx="2"/>
+            <line x1="9" y1="7" x2="15" y2="7"/><line x1="9" y1="11" x2="15" y2="11"/>
+            <line x1="9" y1="15" x2="12" y2="15"/>
+            <path d="M13 17 L16 14 L19 17" stroke="currentColor"/>
+          </svg>
+        </div>
+        <div class="mini-label">電子申請</div>
+      </div>
+      <!-- 災害・防災 -->
+      <div class="mini-app">
+        <div class="mini-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+        </div>
+        <div class="mini-label">災害・防災</div>
+      </div>
+      <!-- エコ活動ポイント -->
+      <div class="mini-app">
+        <div class="mini-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <circle cx="12" cy="12" r="9"/>
+            <text x="12" y="16" text-anchor="middle" font-size="10" font-weight="700" fill="#2d2dcc" stroke="none">P</text>
+          </svg>
+        </div>
+        <div class="mini-label">エコ活動ポ<br>イント</div>
+      </div>
+      <!-- 子育て -->
+      <div class="mini-app">
+        <div class="mini-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <circle cx="12" cy="7" r="3"/>
+            <path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/>
+            <circle cx="19" cy="9" r="2"/>
+            <path d="M19 15v-1a2 2 0 0 1 2-2"/>
+          </svg>
+        </div>
+        <div class="mini-label">子育て</div>
+      </div>
+      <!-- 施設予約 -->
+      <div class="mini-app">
+        <div class="mini-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <rect x="2" y="5" width="20" height="16" rx="2"/>
+            <path d="M16 3v4M8 3v4M2 9h20"/>
+            <path d="M8 13h2v4H8z"/>
+          </svg>
+        </div>
+        <div class="mini-label">施設予約</div>
+      </div>
+      <!-- MYライブラリ -->
+      <div class="mini-app">
+        <div class="mini-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          </svg>
+        </div>
+        <div class="mini-label">MY<br>ライブラリ</div>
+      </div>
+      <!-- 粗大ごみ -->
+      <div class="mini-app">
+        <div class="mini-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <rect x="1" y="3" width="15" height="13" rx="1"/>
+            <path d="M16 8h4l3 3v5h-7V8z"/>
+            <circle cx="5.5" cy="18.5" r="2.5"/>
+            <circle cx="18.5" cy="18.5" r="2.5"/>
+          </svg>
+        </div>
+        <div class="mini-label">粗大ごみ</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- トピックス -->
+  <div class="section" style="margin-top:10px; margin-bottom:10px;">
+    <div class="section-header">
+      <div class="section-title">トピックス</div>
+      <button class="see-all-btn">
+        もっと見る
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="m9 18 6-6-6-6"/></svg>
+      </button>
+    </div>
+    <div class="topic-card">
+      <div class="topic-header">
+        <span class="topic-badge badge-boc">防犯情報</span>
+        <span class="topic-date">2024/05/15 18:32</span>
+      </div>
+      <div class="topic-title">【千歳警察署】不審者に関する情報についてのお知らせ</div>
+    </div>
+    <div class="topic-card">
+      <div class="topic-header">
+        <span class="topic-badge badge-info">お知らせ</span>
+        <span class="topic-date">2024/05/14 10:00</span>
+      </div>
+      <div class="topic-title">令和6年度市民税・道民税（特別徴収）税額通知書を発送しました</div>
+    </div>
+    <div class="topic-card">
+      <div class="topic-header">
+        <span class="topic-badge badge-green">イベント</span>
+        <span class="topic-date">2024/05/13 09:00</span>
+      </div>
+      <div class="topic-title">千歳市子どもまつり2024の開催について</div>
+    </div>
+  </div>
+
+  <!-- ボトムナビ -->
+  <div class="bottom-nav">
+    <div class="nav-item">
+      <div class="nav-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        </svg>
+      </div>
+      <div class="nav-label">ホーム</div>
+    </div>
+    <div class="nav-item">
+      <div class="nav-icon" style="position:relative;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+        </svg>
+        <div class="bell-dot" style="top:0;right:0;"></div>
+      </div>
+      <div class="nav-label">ミニアプリ</div>
+    </div>
+    <div class="nav-item">
+      <div class="nav-icon active">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="4" width="18" height="16" rx="2"/>
+          <circle cx="9" cy="10" r="2"/>
+          <line x1="13" y1="9" x2="17" y2="9"/>
+          <line x1="13" y1="13" x2="17" y2="13"/>
+          <line x1="7" y1="16" x2="17" y2="16"/>
+        </svg>
+      </div>
+      <div class="nav-label active">市民証</div>
+    </div>
+    <div class="nav-item">
+      <div class="nav-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="8" r="4"/>
+          <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+        </svg>
+      </div>
+      <div class="nav-label">アカウント</div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
