@@ -955,6 +955,39 @@
       margin-top: 40px;
     }
 
+    /* ===== マイナポータルモーダル ===== */
+    .myna-modal{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9999;display:none;align-items:center;justify-content:center}
+    .myna-modal.open{display:flex}
+    .myna-modal-inner{background:#fff;border-radius:20px;width:min(360px,92vw);overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.35);animation:modalIn .25s ease}
+    @keyframes modalIn{from{transform:scale(.92);opacity:0}to{transform:scale(1);opacity:1}}
+    .myna-hdr{background:linear-gradient(135deg,#001a8c,#0017C1);padding:20px;text-align:center;color:#fff}
+    .myna-logo-wrap{width:54px;height:54px;background:rgba(255,255,255,.18);border-radius:14px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center}
+    .myna-hdr-title{font-size:14px;font-weight:700}
+    .myna-hdr-sub{font-size:11px;opacity:.65;margin-top:2px}
+    .myna-bd{padding:22px 20px 20px}
+    .myna-s-title{font-size:16px;font-weight:700;color:#111;text-align:center;margin-bottom:8px}
+    .myna-s-desc{font-size:13px;color:#555;text-align:center;line-height:1.6;margin-bottom:16px}
+    .myna-dots{display:flex;justify-content:center;gap:8px;margin:14px 0 6px}
+    .myna-d{width:10px;height:10px;border-radius:50%;background:#0017C1;animation:dotPop 1.2s ease-in-out infinite}
+    .myna-d:nth-child(2){animation-delay:.2s}.myna-d:nth-child(3){animation-delay:.4s}
+    @keyframes dotPop{0%,80%,100%{opacity:.25;transform:scale(.75)}40%{opacity:1;transform:scale(1)}}
+    .pin-disp{display:flex;justify-content:center;gap:10px;margin:16px 0}
+    .pin-c{width:50px;height:56px;border:2px solid #ddd;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:28px;color:#111;transition:border-color .15s,background .15s}
+    .pin-c.on{border-color:#0017C1;background:#f0f4ff}
+    .numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+    .np-btn{height:54px;background:#f4f4f8;border:none;border-radius:10px;font-size:20px;font-weight:700;color:#111;cursor:pointer;transition:background .1s;font-family:inherit}
+    .np-btn:hover:not(.empty){background:#e8eeff}.np-btn:active:not(.empty){background:#d0d8ff}
+    .np-btn.del{font-size:18px;color:#555}.np-btn.empty{background:transparent;cursor:default;pointer-events:none}
+    .myna-cancel{width:100%;height:44px;background:none;border:1.5px solid #ddd;border-radius:8px;font-size:14px;color:#888;cursor:pointer;font-family:inherit}
+    .myna-cancel:hover{border-color:#999;color:#555}
+    .nfc-ring{width:84px;height:84px;border-radius:50%;border:3px solid rgba(0,23,193,.25);margin:0 auto 18px;display:flex;align-items:center;justify-content:center;color:#0017C1;animation:nfcPing 1.6s ease-in-out infinite}
+    @keyframes nfcPing{0%,100%{box-shadow:0 0 0 0 rgba(0,23,193,.4)}50%{box-shadow:0 0 0 18px rgba(0,23,193,0)}}
+    .myna-manual-note{background:#fff8e8;border:1px solid #f0c040;border-radius:10px;padding:12px 14px;font-size:13px;color:#664400;line-height:1.6;margin-bottom:16px;display:flex;align-items:flex-start;gap:8px}
+    .myna-manual-note svg{flex-shrink:0;margin-top:1px}
+    .gender-opts{display:flex;gap:16px;padding:10px 0 4px;flex-wrap:wrap}
+    .gender-opt{display:flex;align-items:center;gap:7px;font-size:15px;color:#333;cursor:pointer}
+    .gender-opt input[type="radio"]{width:18px;height:18px;accent-color:#2d2dcc;cursor:pointer}
+
     @media (max-width: 600px) {
       .form-row { grid-template-columns: 1fr; }
       .action-grid { grid-template-columns: 1fr; }
@@ -1181,7 +1214,7 @@
         </div>
         <div class="mynumber-text">
           <div class="mynumber-title">マイナンバーカードで自動入力</div>
-          <div class="mynumber-desc">氏名・住所・電話番号を自動で入力できます</div>
+          <div class="mynumber-desc">氏名・住所・生年月日・性別をマイナポータルから自動入力できます（電話番号・メールは手動入力）</div>
         </div>
         <button class="mynumber-btn" onclick="autoFill()">カードで自動入力</button>
       </div>
@@ -1196,6 +1229,26 @@
           <div class="field-label">氏名（フリガナ）<span class="req">必須</span></div>
           <input class="text-input" type="text" id="f_kana" placeholder="チトセ　タロウ">
         </div>
+      </div>
+
+      <div class="form-row">
+        <div class="field">
+          <div class="field-label">生年月日<span class="req">必須</span></div>
+          <input class="text-input" type="text" id="f_birth" placeholder="例：1985/04/15">
+        </div>
+        <div class="field">
+          <div class="field-label">性別<span class="req">必須</span></div>
+          <div class="gender-opts">
+            <label class="gender-opt"><input type="radio" name="f_gender" id="f_gender_m" value="male"> 男性</label>
+            <label class="gender-opt"><input type="radio" name="f_gender" id="f_gender_f" value="female"> 女性</label>
+            <label class="gender-opt"><input type="radio" name="f_gender" id="f_gender_n" value="none"> 回答しない</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="myna-manual-note">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#cc8800" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        電話番号・メールアドレスはマイナンバーカードに記録されていないため、手動でご入力ください。
       </div>
 
       <div class="form-row">
@@ -1586,26 +1639,64 @@
     t.classList.toggle('off', !reminderOn);
   }
 
-  // ===== マイナ自動入力 =====
-  function autoFill() {
+  // ===== マイナポータルモーダル =====
+  let pinValue = '';
+  function autoFill() { openMynaModal(); }
+  function openMynaModal() {
+    pinValue = '';
+    updatePinDisp();
+    showMynaStep(1);
+    document.getElementById('mynaModal').classList.add('open');
+    setTimeout(() => showMynaStep(2), 2200);
+  }
+  function closeMynaModal() { document.getElementById('mynaModal').classList.remove('open'); }
+  function showMynaStep(n) {
+    ['mynaStep1','mynaStep2','mynaStep3'].forEach((id,i) => {
+      document.getElementById(id).style.display = (i+1===n) ? 'block' : 'none';
+    });
+  }
+  function inputPin(d) {
+    if (pinValue.length >= 4) return;
+    pinValue += d; updatePinDisp();
+    if (pinValue.length === 4) {
+      setTimeout(() => { showMynaStep(3); setTimeout(() => { fillMynaFields(); closeMynaModal(); }, 2200); }, 400);
+    }
+  }
+  function deletePin() { pinValue = pinValue.slice(0,-1); updatePinDisp(); }
+  function updatePinDisp() {
+    for (let i=0;i<4;i++) {
+      const c = document.getElementById('pinCell'+i);
+      if (i < pinValue.length) { c.textContent='●'; c.classList.add('on'); }
+      else { c.textContent=''; c.classList.remove('on'); }
+    }
+  }
+  function fillMynaFields() {
     const fields = [
-      ['f_name','北海道　太郎'], ['f_kana','ホッカイドウ　タロウ'],
-      ['f_phone','0123456789'], ['f_email','hokkaido.taro@example.com'],
-      ['f_zip','0660063'], ['f_pref','北海道'], ['f_city','千歳市'],
-      ['f_addr','千代田町6丁目7番地']
+      ['f_name','北海道　太郎'],
+      ['f_kana','ホッカイドウ　タロウ'],
+      ['f_birth','1985/04/15'],
+      ['f_zip','0660063'],
+      ['f_pref','北海道'],
+      ['f_city','千歳市'],
+      ['f_addr','千代田町6丁目7番地'],
     ];
     let i = 0;
     function next() {
-      if (i >= fields.length) return;
+      if (i >= fields.length) {
+        const gm = document.getElementById('f_gender_m');
+        if (gm) gm.checked = true;
+        return;
+      }
       const [id, val] = fields[i++];
       const el = document.getElementById(id);
+      if (!el) { next(); return; }
       el.value = '';
       let j = 0;
       const iv = setInterval(() => {
         el.value += val[j++];
         el.classList.add('filled');
         if (j >= val.length) { clearInterval(iv); next(); }
-      }, 40);
+      }, 38);
     }
     next();
   }
@@ -1722,5 +1813,56 @@
   updateSteps(1);
   renderCalendar();
 </script>
+
+<!-- ===== マイナポータルモーダル ===== -->
+<div class="myna-modal" id="mynaModal">
+  <div class="myna-modal-inner">
+    <div class="myna-hdr">
+      <div class="myna-logo-wrap">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">
+          <rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="8" cy="12" r="2"/>
+          <line x1="12" y1="9" x2="18" y2="9"/><line x1="12" y1="12" x2="18" y2="12"/><line x1="12" y1="15" x2="15" y2="15"/>
+        </svg>
+      </div>
+      <div class="myna-hdr-title">マイナポータル</div>
+      <div class="myna-hdr-sub">デジタル庁</div>
+    </div>
+    <!-- Step 1: アプリ切り替え -->
+    <div class="myna-bd" id="mynaStep1">
+      <div class="myna-s-title">マイナポータルアプリに切り替え中</div>
+      <div class="myna-s-desc">本人確認のためマイナポータルアプリを起動しています。<br>しばらくお待ちください。</div>
+      <div class="myna-dots"><div class="myna-d"></div><div class="myna-d"></div><div class="myna-d"></div></div>
+      <div style="font-size:12px;color:#bbb;text-align:center;margin-top:4px;">自動で次の画面に進みます</div>
+    </div>
+    <!-- Step 2: PIN入力 -->
+    <div class="myna-bd" id="mynaStep2" style="display:none;">
+      <div class="myna-s-title">暗証番号を入力してください</div>
+      <div class="myna-s-desc">利用者証明用電子証明書の暗証番号（数字4桁）を入力してください。</div>
+      <div class="pin-disp">
+        <div class="pin-c" id="pinCell0"></div><div class="pin-c" id="pinCell1"></div>
+        <div class="pin-c" id="pinCell2"></div><div class="pin-c" id="pinCell3"></div>
+      </div>
+      <div class="numpad">
+        <button class="np-btn" onclick="inputPin('1')">1</button><button class="np-btn" onclick="inputPin('2')">2</button><button class="np-btn" onclick="inputPin('3')">3</button>
+        <button class="np-btn" onclick="inputPin('4')">4</button><button class="np-btn" onclick="inputPin('5')">5</button><button class="np-btn" onclick="inputPin('6')">6</button>
+        <button class="np-btn" onclick="inputPin('7')">7</button><button class="np-btn" onclick="inputPin('8')">8</button><button class="np-btn" onclick="inputPin('9')">9</button>
+        <button class="np-btn empty"></button><button class="np-btn" onclick="inputPin('0')">0</button><button class="np-btn del" onclick="deletePin()">⌫</button>
+      </div>
+      <button class="myna-cancel" onclick="closeMynaModal()">キャンセル</button>
+    </div>
+    <!-- Step 3: NFC読み取り -->
+    <div class="myna-bd" id="mynaStep3" style="display:none;">
+      <div class="nfc-ring">
+        <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M4.93 4.93a10 10 0 0 1 14.14 0"/><path d="M7.76 7.76a6 6 0 0 1 8.49 0"/>
+          <path d="M10.59 10.59a2 2 0 0 1 2.83 0"/><circle cx="12" cy="14" r="1.5" fill="currentColor" stroke="none"/>
+        </svg>
+      </div>
+      <div class="myna-s-title">カードを読み取り中...</div>
+      <div class="myna-s-desc">スマートフォンの背面にマイナンバーカードを当ててください。<br>動かさずにお待ちください。</div>
+      <div style="font-size:12px;color:#bbb;text-align:center;margin-top:14px;">情報を取得しています...</div>
+    </div>
+  </div>
+</div>
 </body>
 </html>
