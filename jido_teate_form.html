@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>児童手当 認定請求 | 千歳市</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'IBM Plex Sans JP', -apple-system, sans-serif; background: #f4f4f8; color: #111; }
+
+    /* ===== ヘッダー ===== */
+    .site-header {
+      background: #2d2dcc;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .site-header a { color: #fff; text-decoration: none; display: flex; align-items: center; }
+    .header-title { font-size: 17px; font-weight: 700; color: #fff; flex: 1; }
+    .header-badge {
+      font-size: 11px; background: rgba(255,255,255,0.2);
+      color: #fff; border-radius: 20px; padding: 3px 10px; font-weight: 500;
+    }
+
+    /* ===== ステップバー ===== */
+    .step-bar {
+      background: #fff;
+      padding: 16px 20px 14px;
+      border-bottom: 1px solid #e8e8f0;
+    }
+    .step-bar-inner { display: flex; align-items: center; max-width: 700px; margin: 0 auto; }
+    .step-item { display: flex; flex-direction: column; align-items: center; flex: 1; position: relative; }
+    .step-item:not(:last-child)::after {
+      content: ''; position: absolute; top: 14px; left: 60%;
+      width: 80%; height: 2px; background: #e0e0e8;
+    }
+    .step-item.done:not(:last-child)::after { background: #2d2dcc; }
+    .step-circle {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: #e0e0e8; color: #888;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700; position: relative; z-index: 1;
+    }
+    .step-item.active .step-circle { background: #2d2dcc; color: #fff; }
+    .step-item.done .step-circle { background: #2d2dcc; color: #fff; }
+    .step-label { font-size: 11px; color: #888; margin-top: 4px; white-space: nowrap; }
+    .step-item.active .step-label { color: #2d2dcc; font-weight: 700; }
+    .step-item.done .step-label { color: #2d2dcc; }
+
+    /* ===== コンテンツ ===== */
+    .content { max-width: 700px; margin: 0 auto; padding: 24px 16px 60px; }
+
+    /* ===== セクションカード ===== */
+    .section-card {
+      background: #fff; border-radius: 16px;
+      padding: 24px 20px; margin-bottom: 16px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    }
+    .section-label {
+      font-size: 13px; font-weight: 700; color: #2d2dcc;
+      letter-spacing: .05em; margin-bottom: 16px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .section-label::after { content: ''; flex: 1; height: 1px; background: #e8e8f0; }
+
+    /* ===== マイナポータルバナー ===== */
+    .myna-banner {
+      background: linear-gradient(135deg, #f0f2ff, #e8eeff);
+      border: 1.5px solid #c0c8f0;
+      border-radius: 12px;
+      padding: 14px 16px;
+      display: flex; align-items: center; gap: 14px;
+      margin-bottom: 20px;
+    }
+    .myna-banner-icon {
+      width: 44px; height: 44px; border-radius: 10px;
+      background: #2d2dcc; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .myna-banner-text { flex: 1; }
+    .myna-banner-ttl { font-size: 13px; font-weight: 700; color: #1a1a8a; margin-bottom: 3px; }
+    .myna-banner-sub { font-size: 11px; color: #555; line-height: 1.5; }
+    .mn-btn {
+      height: 38px; padding: 0 16px;
+      background: #2d2dcc; color: #fff; border: none;
+      border-radius: 20px; font-size: 13px; font-weight: 700;
+      cursor: pointer; white-space: nowrap; font-family: inherit;
+      flex-shrink: 0;
+    }
+    .mn-btn:hover { background: #2424aa; }
+
+    /* ===== フォーム ===== */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .form-grid.single { grid-template-columns: 1fr; }
+    .field { display: flex; flex-direction: column; }
+    .field-label { font-size: 13px; font-weight: 700; color: #333; margin-bottom: 6px; }
+    .req { font-size: 11px; color: #fff; background: #e04040; border-radius: 4px; padding: 1px 6px; margin-left: 6px; font-weight: 700; }
+    .opt { font-size: 11px; color: #fff; background: #888; border-radius: 4px; padding: 1px 6px; margin-left: 6px; }
+    .text-input {
+      height: 48px; border: 1.5px solid #ccc; border-radius: 10px;
+      padding: 0 14px; font-size: 15px; color: #111; font-family: inherit;
+      transition: border-color .15s, box-shadow .15s; background: #fff;
+    }
+    .text-input:focus { border-color: #2d2dcc; box-shadow: 0 0 0 3px rgba(45,45,204,.1); outline: none; }
+    .text-input.filled { background: #f8f8ff; }
+    .text-select {
+      height: 48px; border: 1.5px solid #ccc; border-radius: 10px;
+      padding: 0 14px; font-size: 15px; color: #111; font-family: inherit;
+      background: #fff; appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 12px center;
+      transition: border-color .15s; cursor: pointer;
+    }
+    .text-select:focus { border-color: #2d2dcc; outline: none; }
+    .field-hint { font-size: 12px; color: #888; margin-top: 5px; line-height: 1.5; }
+    .zip-row { display: flex; gap: 10px; align-items: center; }
+    .zip-btn {
+      height: 48px; padding: 0 16px; background: #f4f4f8;
+      border: 1.5px solid #ccc; border-radius: 10px;
+      font-size: 13px; font-weight: 700; color: #2d2dcc;
+      cursor: pointer; white-space: nowrap; font-family: inherit;
+    }
+    .zip-btn:hover { background: #e8e8f8; }
+    .gender-opts { display: flex; gap: 16px; padding: 10px 0 4px; flex-wrap: wrap; }
+    .gender-opt { display: flex; align-items: center; gap: 7px; font-size: 15px; color: #333; cursor: pointer; }
+    .gender-opt input[type="radio"] { width: 18px; height: 18px; accent-color: #2d2dcc; cursor: pointer; }
+    .myna-manual-note {
+      background: #fff8e8; border: 1px solid #f0c040;
+      border-radius: 10px; padding: 12px 14px;
+      font-size: 13px; color: #664400; line-height: 1.6;
+      margin-bottom: 16px; display: flex; align-items: flex-start; gap: 8px;
+    }
+    .myna-manual-note svg { flex-shrink: 0; margin-top: 1px; }
+
+    /* ===== 児童カード ===== */
+    .child-card {
+      border: 1.5px solid #e0e0e8; border-radius: 12px;
+      padding: 16px; margin-bottom: 12px;
+    }
+    .child-card-header {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 14px;
+    }
+    .child-num {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: #2d2dcc; color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 700; flex-shrink: 0;
+    }
+    .child-num-label { font-size: 14px; font-weight: 700; color: #111; }
+
+    /* ===== 口座情報 ===== */
+    .account-type-opts { display: flex; gap: 14px; padding: 10px 0 4px; }
+    .account-type-opt { display: flex; align-items: center; gap: 7px; font-size: 15px; color: #333; cursor: pointer; }
+    .account-type-opt input[type="radio"] { width: 18px; height: 18px; accent-color: #2d2dcc; cursor: pointer; }
+
+    /* ===== 電子署名バナー ===== */
+    .esig-banner {
+      background: linear-gradient(135deg, #f5f0ff, #ede8ff);
+      border: 1.5px solid #c8b8f0;
+      border-radius: 12px; padding: 16px;
+      margin-bottom: 20px;
+    }
+    .esig-banner-title {
+      font-size: 14px; font-weight: 700; color: #3a1a8a;
+      margin-bottom: 8px; display: flex; align-items: center; gap: 8px;
+    }
+    .esig-banner-desc { font-size: 13px; color: #555; line-height: 1.6; margin-bottom: 12px; }
+    .esig-btn {
+      width: 100%; height: 48px; background: #5a2db0;
+      color: #fff; border: none; border-radius: 10px;
+      font-size: 15px; font-weight: 700; cursor: pointer;
+      font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .esig-btn:hover { background: #4a1e98; }
+    .esig-done { background: #e8ffe8; border: 1px solid #60c060; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #1a6a1a; display: none; align-items: center; gap: 8px; margin-top: 10px; }
+    .esig-done.show { display: flex; }
+
+    /* ===== 確認テーブル ===== */
+    .confirm-section { margin-bottom: 20px; }
+    .confirm-section-title { font-size: 13px; font-weight: 700; color: #2d2dcc; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid #e8e8f0; }
+    .confirm-row { display: flex; border-bottom: 1px solid #f0f0f8; padding: 10px 0; }
+    .confirm-th { font-size: 13px; color: #666; width: 130px; flex-shrink: 0; }
+    .confirm-td { font-size: 14px; color: #111; font-weight: 500; flex: 1; }
+
+    /* ===== ナビボタン ===== */
+    .nav-btns { display: flex; gap: 12px; margin-top: 24px; }
+    .btn-back {
+      flex: 1; height: 52px; background: #fff;
+      border: 1.5px solid #ccc; border-radius: 30px;
+      font-size: 16px; color: #555; cursor: pointer; font-family: inherit;
+    }
+    .btn-back:hover { background: #f4f4f8; }
+    .btn-next {
+      flex: 2; height: 52px; background: #2d2dcc;
+      color: #fff; border: none; border-radius: 30px;
+      font-size: 16px; font-weight: 700; cursor: pointer; font-family: inherit;
+    }
+    .btn-next:hover { background: #2424aa; }
+    .btn-submit {
+      width: 100%; height: 56px; background: #2d2dcc;
+      color: #fff; border: none; border-radius: 30px;
+      font-size: 17px; font-weight: 700; cursor: pointer;
+      font-family: inherit; margin-top: 8px;
+    }
+    .btn-submit:hover { background: #2424aa; }
+    .btn-submit:disabled { background: #aaa; cursor: default; }
+
+    /* ===== 完了画面 ===== */
+    .complete-wrap { text-align: center; padding: 40px 20px; }
+    .complete-icon {
+      width: 80px; height: 80px; border-radius: 50%;
+      background: linear-gradient(135deg, #2d2dcc, #5a5aff);
+      margin: 0 auto 20px;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 8px 24px rgba(45,45,204,.3);
+    }
+    .complete-title { font-size: 22px; font-weight: 700; color: #111; margin-bottom: 10px; }
+    .complete-sub { font-size: 15px; color: #555; line-height: 1.7; margin-bottom: 28px; }
+    .receipt-card {
+      background: #f4f4f8; border-radius: 14px;
+      padding: 20px; text-align: left; margin-bottom: 28px;
+    }
+    .receipt-title { font-size: 12px; color: #888; margin-bottom: 8px; }
+    .receipt-num { font-size: 22px; font-weight: 700; color: #2d2dcc; letter-spacing: .05em; }
+    .receipt-date { font-size: 13px; color: #888; margin-top: 4px; }
+    .timeline { text-align: left; margin-bottom: 28px; }
+    .timeline-item { display: flex; gap: 14px; margin-bottom: 16px; }
+    .tl-left { display: flex; flex-direction: column; align-items: center; }
+    .tl-dot { width: 12px; height: 12px; border-radius: 50%; background: #2d2dcc; flex-shrink: 0; margin-top: 3px; }
+    .tl-line { width: 2px; flex: 1; background: #e0e0e8; margin: 4px auto 0; min-height: 28px; }
+    .tl-right { flex: 1; }
+    .tl-title { font-size: 14px; font-weight: 700; color: #111; margin-bottom: 2px; }
+    .tl-desc { font-size: 12px; color: #888; line-height: 1.5; }
+    .btn-home {
+      display: block; width: 100%; height: 52px;
+      background: #fff; border: 1.5px solid #2d2dcc;
+      border-radius: 30px; font-size: 16px; color: #2d2dcc;
+      font-weight: 700; cursor: pointer; font-family: inherit;
+    }
+    .btn-home:hover { background: #f0f0fc; }
+
+    /* ===== マイナポータルモーダル ===== */
+    .myna-modal{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9999;display:none;align-items:center;justify-content:center}
+    .myna-modal.open{display:flex}
+    .myna-modal-inner{background:#fff;border-radius:20px;width:min(360px,92vw);overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.35);animation:modalIn .25s ease}
+    @keyframes modalIn{from{transform:scale(.92);opacity:0}to{transform:scale(1);opacity:1}}
+    .myna-hdr{background:linear-gradient(135deg,#001a8c,#2d2dcc);padding:20px;text-align:center;color:#fff}
+    .myna-logo-wrap{width:54px;height:54px;background:rgba(255,255,255,.18);border-radius:14px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center}
+    .myna-hdr-title{font-size:14px;font-weight:700}
+    .myna-hdr-sub{font-size:11px;opacity:.65;margin-top:2px}
+    .myna-bd{padding:22px 20px 20px}
+    .myna-s-title{font-size:16px;font-weight:700;color:#111;text-align:center;margin-bottom:8px}
+    .myna-s-desc{font-size:13px;color:#555;text-align:center;line-height:1.6;margin-bottom:16px}
+    .myna-dots{display:flex;justify-content:center;gap:8px;margin:14px 0 6px}
+    .myna-d{width:10px;height:10px;border-radius:50%;background:#2d2dcc;animation:dotPop 1.2s ease-in-out infinite}
+    .myna-d:nth-child(2){animation-delay:.2s}.myna-d:nth-child(3){animation-delay:.4s}
+    @keyframes dotPop{0%,80%,100%{opacity:.25;transform:scale(.75)}40%{opacity:1;transform:scale(1)}}
+    .pin-disp{display:flex;justify-content:center;gap:10px;margin:16px 0}
+    .pin-c{width:50px;height:56px;border:2px solid #ddd;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:28px;color:#111;transition:border-color .15s,background .15s}
+    .pin-c.on{border-color:#2d2dcc;background:#f0f0ff}
+    .numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+    .np-btn{height:54px;background:#f4f4f8;border:none;border-radius:10px;font-size:20px;font-weight:700;color:#111;cursor:pointer;transition:background .1s;font-family:inherit}
+    .np-btn:hover:not(.empty){background:#e8e8f8}.np-btn:active:not(.empty){background:#d8d8f8}
+    .np-btn.del{font-size:18px;color:#555}.np-btn.empty{background:transparent;cursor:default;pointer-events:none}
+    .myna-cancel{width:100%;height:44px;background:none;border:1.5px solid #ddd;border-radius:8px;font-size:14px;color:#888;cursor:pointer;font-family:inherit}
+    .myna-cancel:hover{border-color:#999;color:#555}
+    .nfc-ring{width:84px;height:84px;border-radius:50%;border:3px solid rgba(45,45,204,.25);margin:0 auto 18px;display:flex;align-items:center;justify-content:center;color:#2d2dcc;animation:nfcPing 1.6s ease-in-out infinite}
+    @keyframes nfcPing{0%,100%{box-shadow:0 0 0 0 rgba(45,45,204,.4)}50%{box-shadow:0 0 0 18px rgba(45,45,204,0)}}
+
+    @media (max-width: 640px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .nav-btns { flex-direction: column-reverse; }
+      .btn-back, .btn-next { flex: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="site-header">
+  <a href="denshi_shinsei.html">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m15 18-6-6 6-6"/></svg>
+  </a>
+  <div class="header-title">児童手当 認定請求</div>
+  <div class="header-badge">電子申請</div>
+</div>
+
+<div class="step-bar">
+  <div class="step-bar-inner" id="stepBar">
+    <div class="step-item active" id="si1"><div class="step-circle">1</div><div class="step-label">申請者情報</div></div>
+    <div class="step-item" id="si2"><div class="step-circle">2</div><div class="step-label">児童情報</div></div>
+    <div class="step-item" id="si3"><div class="step-circle">3</div><div class="step-label">口座情報</div></div>
+    <div class="step-item" id="si4"><div class="step-circle">4</div><div class="step-label">確認・署名</div></div>
+    <div class="step-item" id="si5"><div class="step-circle">✓</div><div class="step-label">完了</div></div>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- ===== SCREEN 1: 申請者情報 ===== -->
+  <div id="screen1">
+    <div class="section-card">
+      <div class="section-label">マイナンバーカード連携</div>
+      <div class="myna-banner">
+        <div class="myna-banner-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">
+            <rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="8" cy="12" r="2"/>
+            <line x1="12" y1="9" x2="18" y2="9"/><line x1="12" y1="12" x2="18" y2="12"/><line x1="12" y1="15" x2="15" y2="15"/>
+          </svg>
+        </div>
+        <div class="myna-banner-text">
+          <div class="myna-banner-ttl">マイナポータルで自動入力</div>
+          <div class="myna-banner-sub">氏名・住所・生年月日・性別を自動入力できます（電話番号・メールは手動入力）</div>
+        </div>
+        <button class="mn-btn" onclick="autoFill()">自動入力</button>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-label">申請者情報</div>
+      <div class="form-grid">
+        <div class="field">
+          <div class="field-label">氏名（漢字）<span class="req">必須</span></div>
+          <input class="text-input" type="text" id="f_name" placeholder="北海道　太郎">
+        </div>
+        <div class="field">
+          <div class="field-label">氏名（フリガナ）<span class="req">必須</span></div>
+          <input class="text-input" type="text" id="f_kana" placeholder="ホッカイドウ　タロウ">
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <div class="field-label">生年月日<span class="req">必須</span></div>
+          <input class="text-input" type="text" id="f_birth" placeholder="例：1985/04/15">
+        </div>
+        <div class="field">
+          <div class="field-label">性別<span class="req">必須</span></div>
+          <div class="gender-opts">
+            <label class="gender-opt"><input type="radio" name="f_gender" id="f_gender_m" value="male"> 男性</label>
+            <label class="gender-opt"><input type="radio" name="f_gender" id="f_gender_f" value="female"> 女性</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="myna-manual-note">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#cc8800" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        電話番号・メールアドレスはマイナンバーカードに記録されていないため、手動でご入力ください。
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <div class="field-label">電話番号<span class="req">必須</span></div>
+          <input class="text-input" type="tel" id="f_phone" placeholder="0123456789">
+          <div class="field-hint">ハイフンなし</div>
+        </div>
+        <div class="field">
+          <div class="field-label">メールアドレス<span class="opt">任意</span></div>
+          <input class="text-input" type="email" id="f_email" placeholder="example@email.com">
+          <div class="field-hint">受付完了メールを送付します</div>
+        </div>
+      </div>
+      <div class="form-grid single">
+        <div class="field">
+          <div class="field-label">郵便番号<span class="req">必須</span></div>
+          <div class="zip-row">
+            <input class="text-input" type="text" id="f_zip" placeholder="ハイフンなし（例：0660063）" style="max-width:260px;">
+          </div>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <div class="field-label">都道府県<span class="req">必須</span></div>
+          <input class="text-input" type="text" id="f_pref" placeholder="北海道">
+        </div>
+        <div class="field">
+          <div class="field-label">市区町村<span class="req">必須</span></div>
+          <input class="text-input" type="text" id="f_city" placeholder="千歳市">
+        </div>
+      </div>
+      <div class="form-grid single">
+        <div class="field">
+          <div class="field-label">番地・建物名<span class="req">必須</span></div>
+          <input class="text-input" type="text" id="f_addr" placeholder="千代田町6丁目7番地">
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-btns">
+      <button class="btn-next" onclick="goTo(2)">次へ：児童情報の入力 →</button>
+    </div>
+  </div>
+
+  <!-- ===== SCREEN 2: 児童情報 ===== -->
+  <div id="screen2" style="display:none;">
+    <div class="section-card">
+      <div class="section-label">対象児童の情報</div>
+      <div class="child-card">
+        <div class="child-card-header">
+          <div class="child-num">1</div>
+          <div class="child-num-label">第1子</div>
+        </div>
+        <div class="form-grid">
+          <div class="field">
+            <div class="field-label">児童氏名（漢字）<span class="req">必須</span></div>
+            <input class="text-input" type="text" id="c1_name" placeholder="北海道　一郎">
+          </div>
+          <div class="field">
+            <div class="field-label">児童氏名（フリガナ）<span class="req">必須</span></div>
+            <input class="text-input" type="text" id="c1_kana" placeholder="ホッカイドウ　イチロウ">
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="field">
+            <div class="field-label">生年月日<span class="req">必須</span></div>
+            <input class="text-input" type="text" id="c1_birth" placeholder="例：2022/03/15">
+          </div>
+          <div class="field">
+            <div class="field-label">続柄<span class="req">必須</span></div>
+            <select class="text-select" id="c1_rel">
+              <option value="">選択してください</option>
+              <option>長男</option>
+              <option>長女</option>
+              <option>次男</option>
+              <option>次女</option>
+              <option>三男</option>
+              <option>三女</option>
+              <option>その他</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-grid single">
+          <div class="field">
+            <div class="field-label">申請者との関係<span class="req">必須</span></div>
+            <select class="text-select" id="c1_relation">
+              <option value="">選択してください</option>
+              <option>父</option>
+              <option>母</option>
+              <option>養父</option>
+              <option>養母</option>
+              <option>その他</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-label">申請事由</div>
+      <div class="form-grid single">
+        <div class="field">
+          <div class="field-label">申請事由<span class="req">必須</span></div>
+          <select class="text-select" id="f_reason">
+            <option value="">選択してください</option>
+            <option>出生</option>
+            <option>転入（市外から千歳市へ）</option>
+            <option>公務員の退職</option>
+            <option>その他</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-grid single" style="margin-top:0;">
+        <div class="field">
+          <div class="field-label">申請日<span class="req">必須</span></div>
+          <input class="text-input" type="text" id="f_appdate" placeholder="例：2026/06/21" value="2026/06/21">
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-btns">
+      <button class="btn-back" onclick="goTo(1)">← 戻る</button>
+      <button class="btn-next" onclick="goTo(3)">次へ：口座情報の入力 →</button>
+    </div>
+  </div>
+
+  <!-- ===== SCREEN 3: 口座情報 ===== -->
+  <div id="screen3" style="display:none;">
+    <div class="section-card">
+      <div class="section-label">受取口座情報</div>
+      <p style="font-size:13px;color:#555;line-height:1.6;margin-bottom:16px;">児童手当の振込先口座を入力してください。申請者本人名義の口座のみ指定できます。</p>
+      <div class="form-grid">
+        <div class="field">
+          <div class="field-label">金融機関名<span class="req">必須</span></div>
+          <input class="text-input" type="text" id="b_bank" placeholder="例：北洋銀行">
+        </div>
+        <div class="field">
+          <div class="field-label">支店名<span class="req">必須</span></div>
+          <input class="text-input" type="text" id="b_branch" placeholder="例：千歳支店">
+        </div>
+      </div>
+      <div class="form-grid single">
+        <div class="field">
+          <div class="field-label">口座種別<span class="req">必須</span></div>
+          <div class="account-type-opts">
+            <label class="account-type-opt"><input type="radio" name="b_type" id="b_type_futu" value="普通" checked> 普通</label>
+            <label class="account-type-opt"><input type="radio" name="b_type" id="b_type_toza" value="当座"> 当座</label>
+          </div>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <div class="field-label">口座番号<span class="req">必須</span></div>
+          <input class="text-input" type="text" id="b_num" placeholder="1234567">
+          <div class="field-hint">数字7桁</div>
+        </div>
+        <div class="field">
+          <div class="field-label">口座名義（カナ）<span class="req">必須</span></div>
+          <input class="text-input" type="text" id="b_holder" placeholder="ホッカイドウ タロウ">
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-btns">
+      <button class="btn-back" onclick="goTo(2)">← 戻る</button>
+      <button class="btn-next" onclick="buildConfirm(); goTo(4);">次へ：内容確認 →</button>
+    </div>
+  </div>
+
+  <!-- ===== SCREEN 4: 確認・電子署名 ===== -->
+  <div id="screen4" style="display:none;">
+    <div class="section-card">
+      <div class="confirm-section">
+        <div class="confirm-section-title">申請者情報</div>
+        <div id="conf_applicant"></div>
+      </div>
+      <div class="confirm-section">
+        <div class="confirm-section-title">対象児童情報</div>
+        <div id="conf_child"></div>
+      </div>
+      <div class="confirm-section">
+        <div class="confirm-section-title">受取口座情報</div>
+        <div id="conf_account"></div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-label">電子署名</div>
+      <div class="esig-banner">
+        <div class="esig-banner-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          マイナンバーカードによる電子署名が必要です
+        </div>
+        <div class="esig-banner-desc">
+          申請データの改ざん防止のため、マイナンバーカードの署名用電子証明書による署名が必要です。カードをスマートフォンにかざして署名してください。
+        </div>
+        <button class="esig-btn" onclick="doEsig()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          マイナンバーカードで署名する
+        </button>
+        <div class="esig-done" id="esigDone">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1a6a1a" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          電子署名が完了しました
+        </div>
+      </div>
+      <button class="btn-submit" id="submitBtn" onclick="goTo(5)" disabled>申請を送信する</button>
+    </div>
+
+    <div class="nav-btns" style="margin-top:0;">
+      <button class="btn-back" onclick="goTo(3)">← 戻る</button>
+    </div>
+  </div>
+
+  <!-- ===== SCREEN 5: 完了 ===== -->
+  <div id="screen5" style="display:none;">
+    <div class="section-card">
+      <div class="complete-wrap">
+        <div class="complete-icon">
+          <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="complete-title">申請を受け付けました</div>
+        <div class="complete-sub">児童手当認定請求の電子申請が完了しました。<br>審査結果は登録メールアドレスにお送りします。</div>
+
+        <div class="receipt-card">
+          <div class="receipt-title">受付番号</div>
+          <div class="receipt-num" id="receiptNum">CJ-2026-062100001</div>
+          <div class="receipt-date">受付日時：2026年6月21日 10:32</div>
+        </div>
+
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div>
+            <div class="tl-right">
+              <div class="tl-title">申請受付</div>
+              <div class="tl-desc">電子申請を受け付けました</div>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="tl-left"><div class="tl-dot" style="background:#ccc;"></div><div class="tl-line"></div></div>
+            <div class="tl-right">
+              <div class="tl-title">書類審査</div>
+              <div class="tl-desc">市担当者が申請内容を確認します（1〜2週間程度）</div>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="tl-left"><div class="tl-dot" style="background:#ccc;"></div></div>
+            <div class="tl-right">
+              <div class="tl-title">認定通知・初回振込</div>
+              <div class="tl-desc">認定後、登録口座へ振込されます（毎年6月・10月・2月）</div>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn-home" onclick="location.href='denshi_shinsei.html'">電子申請トップへ戻る</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /content -->
+
+<!-- ===== マイナポータルモーダル ===== -->
+<div class="myna-modal" id="mynaModal">
+  <div class="myna-modal-inner">
+    <div class="myna-hdr">
+      <div class="myna-logo-wrap">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">
+          <rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="8" cy="12" r="2"/>
+          <line x1="12" y1="9" x2="18" y2="9"/><line x1="12" y1="12" x2="18" y2="12"/><line x1="12" y1="15" x2="15" y2="15"/>
+        </svg>
+      </div>
+      <div class="myna-hdr-title">マイナポータル</div>
+      <div class="myna-hdr-sub">デジタル庁</div>
+    </div>
+    <div class="myna-bd" id="mynaStep1">
+      <div class="myna-s-title">マイナポータルアプリに切り替え中</div>
+      <div class="myna-s-desc">本人確認のためマイナポータルアプリを起動しています。<br>しばらくお待ちください。</div>
+      <div class="myna-dots"><div class="myna-d"></div><div class="myna-d"></div><div class="myna-d"></div></div>
+      <div style="font-size:12px;color:#bbb;text-align:center;margin-top:4px;">自動で次の画面に進みます</div>
+    </div>
+    <div class="myna-bd" id="mynaStep2" style="display:none;">
+      <div class="myna-s-title">暗証番号を入力してください</div>
+      <div class="myna-s-desc">利用者証明用電子証明書の暗証番号（数字4桁）を入力してください。</div>
+      <div class="pin-disp">
+        <div class="pin-c" id="pinCell0"></div><div class="pin-c" id="pinCell1"></div>
+        <div class="pin-c" id="pinCell2"></div><div class="pin-c" id="pinCell3"></div>
+      </div>
+      <div class="numpad">
+        <button class="np-btn" onclick="inputPin('1')">1</button><button class="np-btn" onclick="inputPin('2')">2</button><button class="np-btn" onclick="inputPin('3')">3</button>
+        <button class="np-btn" onclick="inputPin('4')">4</button><button class="np-btn" onclick="inputPin('5')">5</button><button class="np-btn" onclick="inputPin('6')">6</button>
+        <button class="np-btn" onclick="inputPin('7')">7</button><button class="np-btn" onclick="inputPin('8')">8</button><button class="np-btn" onclick="inputPin('9')">9</button>
+        <button class="np-btn empty"></button><button class="np-btn" onclick="inputPin('0')">0</button><button class="np-btn del" onclick="deletePin()">⌫</button>
+      </div>
+      <button class="myna-cancel" onclick="closeMynaModal()">キャンセル</button>
+    </div>
+    <div class="myna-bd" id="mynaStep3" style="display:none;">
+      <div class="nfc-ring">
+        <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M4.93 4.93a10 10 0 0 1 14.14 0"/><path d="M7.76 7.76a6 6 0 0 1 8.49 0"/>
+          <path d="M10.59 10.59a2 2 0 0 1 2.83 0"/><circle cx="12" cy="14" r="1.5" fill="currentColor" stroke="none"/>
+        </svg>
+      </div>
+      <div class="myna-s-title">カードを読み取り中...</div>
+      <div class="myna-s-desc">スマートフォンの背面にマイナンバーカードを当ててください。<br>動かさずにお待ちください。</div>
+      <div style="font-size:12px;color:#bbb;text-align:center;margin-top:14px;">情報を取得しています...</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 電子署名モーダル ===== -->
+<div class="myna-modal" id="esigModal">
+  <div class="myna-modal-inner">
+    <div class="myna-hdr" style="background:linear-gradient(135deg,#2a0a6a,#5a2db0);">
+      <div class="myna-logo-wrap">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">
+          <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+      </div>
+      <div class="myna-hdr-title">電子署名</div>
+      <div class="myna-hdr-sub">公的個人認証サービス（JPKI）</div>
+    </div>
+    <div class="myna-bd" id="esigStep1">
+      <div class="myna-s-title">署名用暗証番号を入力</div>
+      <div class="myna-s-desc">署名用電子証明書の暗証番号（英数字6〜16桁）を入力してください。</div>
+      <div class="pin-disp">
+        <div class="pin-c" id="eCell0"></div><div class="pin-c" id="eCell1"></div>
+        <div class="pin-c" id="eCell2"></div><div class="pin-c" id="eCell3"></div>
+      </div>
+      <div class="numpad">
+        <button class="np-btn" onclick="inputEPin('1')">1</button><button class="np-btn" onclick="inputEPin('2')">2</button><button class="np-btn" onclick="inputEPin('3')">3</button>
+        <button class="np-btn" onclick="inputEPin('4')">4</button><button class="np-btn" onclick="inputEPin('5')">5</button><button class="np-btn" onclick="inputEPin('6')">6</button>
+        <button class="np-btn" onclick="inputEPin('7')">7</button><button class="np-btn" onclick="inputEPin('8')">8</button><button class="np-btn" onclick="inputEPin('9')">9</button>
+        <button class="np-btn empty"></button><button class="np-btn" onclick="inputEPin('0')">0</button><button class="np-btn del" onclick="deleteEPin()">⌫</button>
+      </div>
+      <button class="myna-cancel" onclick="closeEsigModal()">キャンセル</button>
+    </div>
+    <div class="myna-bd" id="esigStep2" style="display:none;">
+      <div class="nfc-ring" style="border-color:rgba(90,45,176,.25);color:#5a2db0;animation:none;box-shadow:0 0 0 10px rgba(90,45,176,.08);">
+        <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M4.93 4.93a10 10 0 0 1 14.14 0"/><path d="M7.76 7.76a6 6 0 0 1 8.49 0"/>
+          <path d="M10.59 10.59a2 2 0 0 1 2.83 0"/><circle cx="12" cy="14" r="1.5" fill="currentColor" stroke="none"/>
+        </svg>
+      </div>
+      <div class="myna-s-title">カードで署名中...</div>
+      <div class="myna-s-desc">スマートフォンの背面にマイナンバーカードを当ててください。申請データに電子署名を付与しています。</div>
+      <div style="font-size:12px;color:#bbb;text-align:center;margin-top:14px;">署名処理中...</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ===== 画面遷移 =====
+  const screens = [null,'screen1','screen2','screen3','screen4','screen5'];
+  const stepItems = [null,'si1','si2','si3','si4','si5'];
+
+  function goTo(n) {
+    screens.slice(1).forEach((id, i) => {
+      document.getElementById(id).style.display = (i+1 === n) ? 'block' : 'none';
+    });
+    stepItems.slice(1).forEach((id, i) => {
+      const el = document.getElementById(id);
+      el.classList.remove('active','done');
+      if (i+1 < n) el.classList.add('done');
+      if (i+1 === n) el.classList.add('active');
+    });
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  }
+
+  // ===== 確認画面生成 =====
+  function cr(th, td) {
+    return `<div class="confirm-row"><div class="confirm-th">${th}</div><div class="confirm-td">${td||'—'}</div></div>`;
+  }
+  function buildConfirm() {
+    const gender = document.querySelector('input[name="f_gender"]:checked');
+    document.getElementById('conf_applicant').innerHTML =
+      cr('氏名', document.getElementById('f_name').value) +
+      cr('フリガナ', document.getElementById('f_kana').value) +
+      cr('生年月日', document.getElementById('f_birth').value) +
+      cr('性別', gender ? gender.value === 'male' ? '男性' : '女性' : '—') +
+      cr('電話番号', document.getElementById('f_phone').value) +
+      cr('メール', document.getElementById('f_email').value) +
+      cr('住所', document.getElementById('f_pref').value + document.getElementById('f_city').value + document.getElementById('f_addr').value);
+
+    document.getElementById('conf_child').innerHTML =
+      cr('氏名', document.getElementById('c1_name').value) +
+      cr('フリガナ', document.getElementById('c1_kana').value) +
+      cr('生年月日', document.getElementById('c1_birth').value) +
+      cr('続柄', document.getElementById('c1_rel').value) +
+      cr('申請者との関係', document.getElementById('c1_relation').value) +
+      cr('申請事由', document.getElementById('f_reason').value);
+
+    const btype = document.querySelector('input[name="b_type"]:checked');
+    document.getElementById('conf_account').innerHTML =
+      cr('金融機関', document.getElementById('b_bank').value) +
+      cr('支店', document.getElementById('b_branch').value) +
+      cr('口座種別', btype ? btype.value : '普通') +
+      cr('口座番号', document.getElementById('b_num').value) +
+      cr('口座名義', document.getElementById('b_holder').value);
+  }
+
+  // ===== 電子署名 =====
+  let ePinValue = '';
+  function doEsig() {
+    ePinValue = '';
+    updateEPinDisp();
+    document.getElementById('esigStep1').style.display = 'block';
+    document.getElementById('esigStep2').style.display = 'none';
+    document.getElementById('esigModal').classList.add('open');
+  }
+  function closeEsigModal() { document.getElementById('esigModal').classList.remove('open'); }
+  function inputEPin(d) {
+    if (ePinValue.length >= 4) return;
+    ePinValue += d; updateEPinDisp();
+    if (ePinValue.length === 4) {
+      setTimeout(() => {
+        document.getElementById('esigStep1').style.display = 'none';
+        document.getElementById('esigStep2').style.display = 'block';
+        setTimeout(() => {
+          closeEsigModal();
+          document.getElementById('esigDone').classList.add('show');
+          document.getElementById('submitBtn').disabled = false;
+        }, 2200);
+      }, 400);
+    }
+  }
+  function deleteEPin() { ePinValue = ePinValue.slice(0,-1); updateEPinDisp(); }
+  function updateEPinDisp() {
+    for (let i=0;i<4;i++) {
+      const c = document.getElementById('eCell'+i);
+      if (i < ePinValue.length) { c.textContent='●'; c.classList.add('on'); }
+      else { c.textContent=''; c.classList.remove('on'); }
+    }
+  }
+
+  // ===== マイナポータルモーダル（自動入力） =====
+  let pinValue = '';
+  function autoFill() { openMynaModal(); }
+  function openMynaModal() {
+    pinValue = ''; updatePinDisp(); showMynaStep(1);
+    document.getElementById('mynaModal').classList.add('open');
+    setTimeout(() => showMynaStep(2), 2200);
+  }
+  function closeMynaModal() { document.getElementById('mynaModal').classList.remove('open'); }
+  function showMynaStep(n) {
+    ['mynaStep1','mynaStep2','mynaStep3'].forEach((id,i) => {
+      document.getElementById(id).style.display = (i+1===n) ? 'block' : 'none';
+    });
+  }
+  function inputPin(d) {
+    if (pinValue.length >= 4) return;
+    pinValue += d; updatePinDisp();
+    if (pinValue.length === 4) {
+      setTimeout(() => { showMynaStep(3); setTimeout(() => { fillMynaFields(); closeMynaModal(); }, 2200); }, 400);
+    }
+  }
+  function deletePin() { pinValue = pinValue.slice(0,-1); updatePinDisp(); }
+  function updatePinDisp() {
+    for (let i=0;i<4;i++) {
+      const c = document.getElementById('pinCell'+i);
+      if (i < pinValue.length) { c.textContent='●'; c.classList.add('on'); }
+      else { c.textContent=''; c.classList.remove('on'); }
+    }
+  }
+  function fillMynaFields() {
+    const fields = [
+      ['f_name','北海道　太郎'],['f_kana','ホッカイドウ　タロウ'],
+      ['f_birth','1985/04/15'],['f_zip','0660063'],
+      ['f_pref','北海道'],['f_city','千歳市'],['f_addr','千代田町6丁目7番地'],
+    ];
+    let i = 0;
+    function next() {
+      if (i >= fields.length) {
+        document.getElementById('f_gender_m').checked = true;
+        document.getElementById('b_holder').value = 'ホッカイドウ タロウ';
+        return;
+      }
+      const [id, val] = fields[i++];
+      const el = document.getElementById(id);
+      if (!el) { next(); return; }
+      el.value = ''; let j = 0;
+      const iv = setInterval(() => {
+        el.value += val[j++]; el.classList.add('filled');
+        if (j >= val.length) { clearInterval(iv); next(); }
+      }, 38);
+    }
+    next();
+  }
+</script>
+</body>
+</html>
