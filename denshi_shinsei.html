@@ -193,6 +193,84 @@
     .detail-btn:hover {
       background: #2424aa;
     }
+
+    .pittari-btn {
+      display: block;
+      width: 100%;
+      height: 48px;
+      background: #fff;
+      color: #2d2dcc;
+      border: 2px solid #2d2dcc;
+      border-radius: 30px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      text-align: center;
+      line-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .pittari-btn:hover {
+      background: #f0f0fc;
+    }
+
+    .tag-orange {
+      background: #fff0e0;
+      color: #b35a00;
+    }
+
+    .tag-purple {
+      background: #ede8f8;
+      color: #5a2db0;
+    }
+
+    .type-legend {
+      background: #fff;
+      margin: 10px 16px 0;
+      border-radius: 12px;
+      padding: 14px 16px;
+    }
+
+    .type-legend-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #444;
+      margin-bottom: 10px;
+    }
+
+    .legend-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 8px;
+      font-size: 12px;
+      color: #555;
+      line-height: 1.5;
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 3px;
+    }
+
+    .dot-blue { background: #2d2dcc; }
+    .dot-orange { background: #e07000; }
+
+    .fee-badge {
+      font-size: 12px;
+      color: #b35a00;
+      background: #fff0e0;
+      border-radius: 6px;
+      padding: 2px 8px;
+      margin-top: 6px;
+      display: inline-block;
+    }
   </style>
 </head>
 <body>
@@ -216,47 +294,83 @@
       <div class="category-label">カテゴリー選択</div>
       <select class="category-select" aria-label="カテゴリー選択">
         <option>すべて</option>
-        <option>引越し</option>
-        <option>年金</option>
-        <option>市民証</option>
+        <option>子育て</option>
+        <option>介護・高齢者</option>
+        <option>証明書発行</option>
       </select>
     </div>
 
-    <div class="section">
-      <div class="section-title">引越し</div>
-      <div class="card">
-        <div class="card-title">引越し手続きについて</div>
-        <div class="tags">
-          <span class="tag tag-green">電子申請可</span>
-          <span class="tag tag-blue">電子署名必須</span>
-        </div>
-        <div class="card-desc">マイナポータルから引越しの申請ができます。</div>
-        <button class="detail-btn">詳しく見る</button>
+    <div class="type-legend">
+      <div class="type-legend-title">申請方法について</div>
+      <div class="legend-row">
+        <div class="legend-dot dot-blue"></div>
+        <div><strong>アプリ内で申請</strong>：手数料不要の手続きはアプリ内フォームから直接申請できます（ぴったりサービスAPI連携）</div>
+      </div>
+      <div class="legend-row">
+        <div class="legend-dot dot-orange"></div>
+        <div><strong>ぴったりサービスで申請</strong>：手数料が発生する手続きはぴったりサービスに移動し、PayPay・クレジットカード等でお支払いいただけます</div>
       </div>
     </div>
 
     <div class="section">
-      <div class="section-title">年金</div>
+      <div class="section-title">子育て</div>
       <div class="card">
-        <div class="card-title">年金に関する情報の確認と申請について</div>
+        <div class="card-title">児童手当 認定請求</div>
         <div class="tags">
           <span class="tag tag-green">電子申請可</span>
+          <span class="tag tag-blue">手数料なし</span>
           <span class="tag tag-blue">電子署名必須</span>
         </div>
-        <div class="card-desc">マイナポータルから引越しの申請ができます。</div>
-        <button class="detail-btn">詳しく見る</button>
+        <div class="card-desc">お子さんが生まれたとき・転入したときに必要な児童手当の新規申請です。マイナンバーカードで氏名・住所を自動入力できます。</div>
+        <button class="detail-btn">アプリ内で申請する</button>
       </div>
     </div>
 
     <div class="section">
-      <div class="section-title">市民証</div>
+      <div class="section-title">介護・高齢者</div>
       <div class="card">
-        <div class="card-title">市民証の発行・更新について</div>
+        <div class="card-title">要介護・要支援認定申請</div>
         <div class="tags">
           <span class="tag tag-green">電子申請可</span>
+          <span class="tag tag-blue">手数料なし</span>
+          <span class="tag tag-blue">電子署名必須</span>
         </div>
-        <div class="card-desc">市民証の新規発行および更新申請をオンラインで行えます。</div>
-        <button class="detail-btn">詳しく見る</button>
+        <div class="card-desc">介護サービスの利用に必要な要介護・要支援の認定を申請します（新規・更新）。マイナンバーカードで申請者情報を自動入力できます。</div>
+        <button class="detail-btn">アプリ内で申請する</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">証明書発行</div>
+      <div class="card">
+        <div class="card-title">住民票の写し</div>
+        <div class="tags">
+          <span class="tag tag-green">電子申請可</span>
+          <span class="tag tag-orange">手数料あり</span>
+          <span class="tag tag-purple">ぴったりサービス</span>
+        </div>
+        <div class="card-desc">住民票の写しをオンラインで請求できます。</div>
+        <div class="fee-badge">手数料 300円｜PayPay・クレジットカード等</div>
+        <div style="height:12px;"></div>
+        <button class="pittari-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          ぴったりサービスで申請
+        </button>
+      </div>
+      <div class="card">
+        <div class="card-title">所得証明書（課税証明書）</div>
+        <div class="tags">
+          <span class="tag tag-green">電子申請可</span>
+          <span class="tag tag-orange">手数料あり</span>
+          <span class="tag tag-purple">ぴったりサービス</span>
+        </div>
+        <div class="card-desc">所得・課税状況の証明書をオンラインで請求できます。融資・保育料算定・奨学金申請などにご利用いただけます。</div>
+        <div class="fee-badge">手数料 300円｜PayPay・クレジットカード等</div>
+        <div style="height:12px;"></div>
+        <button class="pittari-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          ぴったりサービスで申請
+        </button>
       </div>
     </div>
   </div>
