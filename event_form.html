@@ -1432,10 +1432,6 @@
     document.getElementById('detailDesc').innerHTML = selectedEvent.desc.replace(/\n/g, '<br>');
     document.getElementById('detailNotice').innerHTML = `<strong>⚠ ご注意・天候について</strong><br>${selectedEvent.notice.replace(/\n/g, '<br>')}`;
 
-    const pct = Math.round((1 - selectedEvent.seats / selectedEvent.seatsTotal) * 100);
-    document.getElementById('seatsRemain').textContent = `残り ${selectedEvent.seats} 席（定員 ${selectedEvent.seatsTotal} 名）`;
-    document.getElementById('seatsBar').style.width = pct + '%';
-
     const disabled = selectedEvent.badge === 'full';
     document.getElementById('applyBtn').disabled = disabled;
     document.getElementById('applyBtn').style.background = disabled ? '#ccc' : '';
