@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>街を楽しもう | 千歳市</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'IBM Plex Sans JP', -apple-system, sans-serif; background: #f0f0f8; }
+
+    /* ===== ヘッダー ===== */
+    .app-header {
+      background: #fff;
+      padding: 14px 16px;
+      display: flex; align-items: center; gap: 12px;
+      border-bottom: 0.5px solid #e0e0e8;
+      position: sticky; top: 0; z-index: 200;
+    }
+    .app-header-back { color: #333; cursor: pointer; display: flex; align-items: center; }
+    .app-header-title { flex: 1; font-size: 17px; font-weight: 700; color: #111; text-align: center; }
+    .app-header-space { width: 24px; }
+
+    /* ===== クーポンセクション ===== */
+    .coupon-section { background: #fff; padding: 14px 16px 16px; }
+    .sec-title { font-size: 14px; font-weight: 700; color: #111; margin-bottom: 12px; }
+    .coupon-badges { display: flex; gap: 10px; }
+    .badge {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      width: 88px; height: 88px; border-radius: 50%;
+      font-size: 13px; font-weight: 700; text-align: center;
+      cursor: pointer; flex-shrink: 0; line-height: 1.3;
+      box-shadow: 0 3px 10px rgba(0,0,0,.15);
+    }
+    .badge-special { background: linear-gradient(135deg, #f7b731, #f0860a); color: #fff; }
+    .badge-new { background: linear-gradient(135deg, #2d2dcc, #5a5aee); color: #fff; }
+    .badge-popular { background: linear-gradient(135deg, #2d2dcc, #5a5aee); color: #fff; }
+    .badge-sub { font-size: 10px; font-weight: 500; opacity: .85; margin-top: 2px; }
+
+    /* ===== スポット検索マップ ===== */
+    .spot-section { background: #fff; margin-top: 8px; }
+    .spot-header { padding: 12px 16px 0; font-size: 14px; font-weight: 700; color: #111; }
+    #map { height: 280px; z-index: 1; }
+
+    /* マーカーカスタム */
+    .spot-marker {
+      width: 32px; height: 32px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700; color: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,.3);
+      border: 2px solid #fff;
+    }
+
+    /* ===== おすすめ店舗 ===== */
+    .recommend-section { background: #fff; margin-top: 8px; padding: 14px 0 16px; }
+    .recommend-section .sec-title { padding: 0 16px 10px; }
+    .shop-scroll { display: flex; gap: 12px; overflow-x: auto; padding: 0 16px; scrollbar-width: none; }
+    .shop-scroll::-webkit-scrollbar { display: none; }
+    .shop-chip {
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      cursor: pointer; flex-shrink: 0; width: 72px;
+    }
+    .shop-avatar {
+      width: 64px; height: 64px; border-radius: 50%;
+      object-fit: cover; background: #e8e8f0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; border: 2px solid #e0e0e8;
+      overflow: hidden;
+    }
+    .shop-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .shop-chip-name { font-size: 11px; color: #333; text-align: center; line-height: 1.3; }
+
+    /* スポット画面下部余白 */
+    .recommend-section { padding-bottom: 80px !important; }
+
+    /* ===== HOME ボタン ===== */
+    .home-fab {
+      position: fixed; right: 20px; bottom: 24px; z-index: 300;
+      width: 60px; height: 60px; border-radius: 50%;
+      background: #22bb66; color: #fff;
+      border: none; font-size: 12px; font-weight: 700;
+      cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,.25);
+      display: flex; align-items: center; justify-content: center;
+      font-family: inherit;
+    }
+
+    /* ===== スポット詳細 ===== */
+    #screen2 { background: #f4f4f8; min-height: 100vh; }
+    .store-hero {
+      height: 180px; background: linear-gradient(135deg, #2d2dcc20, #5a5aee20);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 60px; position: relative;
+    }
+    .store-hero-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,.5));
+    }
+    .store-info-card {
+      background: #fff; padding: 18px 16px;
+      border-bottom: 1px solid #eee;
+    }
+    .store-name { font-size: 18px; font-weight: 700; color: #111; margin-bottom: 10px; }
+    .store-meta { display: flex; flex-direction: column; gap: 6px; }
+    .store-meta-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #555; }
+    .store-meta-row svg { flex-shrink: 0; color: #2d2dcc; }
+    .store-actions {
+      display: flex; gap: 10px; padding: 14px 16px;
+      background: #fff; border-bottom: 1px solid #eee;
+    }
+    .action-btn {
+      flex: 1; height: 44px; border-radius: 22px;
+      border: 1.5px solid #2d2dcc; background: #fff;
+      color: #2d2dcc; font-size: 14px; font-weight: 700;
+      cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+      font-family: inherit;
+    }
+    .action-btn.primary { background: #2d2dcc; color: #fff; }
+    .action-btn:hover { opacity: .85; }
+
+    /* ===== タブ ===== */
+    .tab-bar {
+      display: flex; background: #fff;
+      border-bottom: 1px solid #e0e0e8;
+      position: sticky; top: 56px; z-index: 100;
+    }
+    .tab-item {
+      flex: 1; height: 48px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 500; color: #888;
+      cursor: pointer; border-bottom: 3px solid transparent;
+      transition: color .15s, border-color .15s;
+    }
+    .tab-item.active { color: #2d2dcc; border-bottom-color: #2d2dcc; font-weight: 700; }
+    .tab-content { display: none; padding: 16px; }
+    .tab-content.active { display: block; }
+
+    /* ===== クーポンタブ ===== */
+    .coupon-card {
+      background: #fff; border-radius: 16px;
+      overflow: hidden; margin-bottom: 14px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.08);
+    }
+    .coupon-header {
+      background: linear-gradient(135deg, #2d2dcc, #5a5aee);
+      padding: 16px; color: #fff;
+    }
+    .coupon-type { font-size: 11px; opacity: .8; margin-bottom: 4px; }
+    .coupon-title { font-size: 18px; font-weight: 700; line-height: 1.4; }
+    .coupon-body { padding: 16px; }
+    .coupon-expiry { font-size: 12px; color: #888; margin-bottom: 16px; display: flex; align-items: center; gap: 5px; }
+    .coupon-desc { font-size: 13px; color: #444; line-height: 1.6; margin-bottom: 16px; }
+    .coupon-divider {
+      height: 1px; background: repeating-linear-gradient(90deg, #ddd 0 6px, transparent 6px 12px);
+      margin-bottom: 16px;
+    }
+
+    .qr-btn {
+      width: 100%; height: 52px; border-radius: 10px;
+      background: #f4f4f8; border: 1.5px solid #d0d0e0;
+      font-size: 15px; font-weight: 700; color: #2d2dcc;
+      cursor: pointer; font-family: inherit;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      margin-bottom: 10px;
+    }
+    .qr-btn:hover { background: #e8e8f8; }
+
+    .use-btn {
+      width: 100%; height: 52px; border-radius: 10px;
+      background: #ccc; border: none;
+      font-size: 16px; font-weight: 700; color: #fff;
+      cursor: default; font-family: inherit;
+      transition: background .3s;
+    }
+    .use-btn.ready {
+      background: #22bb66; cursor: pointer; animation: btnReady .4s ease;
+    }
+    @keyframes btnReady { from{transform:scale(.95)} to{transform:scale(1)} }
+
+    .qr-scan-status {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; color: #22bb66; font-weight: 700;
+      margin-bottom: 10px; display: none;
+    }
+    .qr-scan-status.show { display: flex; }
+
+    /* ===== 詳細タブ ===== */
+    .detail-section { margin-bottom: 16px; }
+    .detail-section-title { font-size: 13px; font-weight: 700; color: #2d2dcc; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid #e8e8f0; }
+    .detail-row { display: flex; padding: 8px 0; border-bottom: 1px solid #f4f4f8; gap: 10px; }
+    .detail-th { font-size: 13px; color: #888; width: 80px; flex-shrink: 0; }
+    .detail-td { font-size: 14px; color: #111; }
+    .tag-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+    .genre-tag { font-size: 12px; padding: 4px 12px; border-radius: 20px; background: #e8e8f8; color: #2d2dcc; font-weight: 500; }
+
+    /* ===== カメラモーダル ===== */
+    .camera-modal {
+      position: fixed; inset: 0; background: rgba(0,0,0,.85);
+      z-index: 9999; display: none; flex-direction: column;
+      align-items: center; justify-content: center;
+    }
+    .camera-modal.open { display: flex; }
+    .camera-view {
+      width: 300px; height: 300px; border-radius: 16px;
+      background: #000; position: relative; overflow: hidden;
+      border: 2px solid rgba(255,255,255,.2);
+    }
+    .scan-frame {
+      position: absolute; inset: 24px;
+      border: 2px solid rgba(255,255,255,.3);
+    }
+    .scan-corner {
+      position: absolute; width: 20px; height: 20px;
+      border-color: #22ff88; border-style: solid;
+    }
+    .sc-tl { top: -1px; left: -1px; border-width: 3px 0 0 3px; }
+    .sc-tr { top: -1px; right: -1px; border-width: 3px 3px 0 0; }
+    .sc-bl { bottom: -1px; left: -1px; border-width: 0 0 3px 3px; }
+    .sc-br { bottom: -1px; right: -1px; border-width: 0 3px 3px 0; }
+    .scan-line {
+      position: absolute; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, #22ff88, transparent);
+      top: 30%; animation: scanMove 1.8s ease-in-out infinite;
+    }
+    @keyframes scanMove {
+      0%,100% { top: 20%; opacity: 1; }
+      50% { top: 75%; opacity: .8; }
+    }
+    .camera-success {
+      position: absolute; inset: 0; background: rgba(0,0,0,.7);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity .3s;
+    }
+    .camera-success.show { opacity: 1; }
+    .camera-success svg { color: #22ff88; margin-bottom: 10px; }
+    .camera-success-text { color: #fff; font-size: 16px; font-weight: 700; }
+    .camera-label { color: rgba(255,255,255,.7); font-size: 14px; margin-top: 16px; text-align: center; }
+    .camera-close {
+      margin-top: 20px; height: 44px; padding: 0 32px;
+      border: 1.5px solid rgba(255,255,255,.4); border-radius: 22px;
+      background: transparent; color: #fff; font-size: 14px;
+      cursor: pointer; font-family: inherit;
+    }
+
+    /* ===== クーポン使用済みモーダル ===== */
+    .used-modal {
+      position: fixed; inset: 0; background: rgba(0,0,0,.7);
+      z-index: 9999; display: none; align-items: center; justify-content: center;
+    }
+    .used-modal.open { display: flex; }
+    .used-card {
+      background: #fff; border-radius: 20px; width: min(340px, 90vw);
+      padding: 32px 24px; text-align: center;
+      animation: modalIn .3s ease;
+    }
+    @keyframes modalIn { from{transform:scale(.88);opacity:0} to{transform:scale(1);opacity:1} }
+    .used-icon {
+      width: 80px; height: 80px; border-radius: 50%;
+      background: linear-gradient(135deg, #22bb66, #11dd77);
+      margin: 0 auto 16px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .used-title { font-size: 22px; font-weight: 700; color: #111; margin-bottom: 8px; }
+    .used-sub { font-size: 14px; color: #555; line-height: 1.6; margin-bottom: 24px; }
+    .used-stamp {
+      border: 3px solid #e04040; border-radius: 8px; padding: 8px 20px;
+      display: inline-block; font-size: 22px; font-weight: 700; color: #e04040;
+      transform: rotate(-8deg); margin-bottom: 24px; letter-spacing: .1em;
+    }
+    .used-close {
+      width: 100%; height: 48px; background: #2d2dcc; color: #fff;
+      border: none; border-radius: 24px; font-size: 16px; font-weight: 700;
+      cursor: pointer; font-family: inherit;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== SCREEN 1: スポット画面 ===== -->
+<div id="screen1">
+  <div class="app-header">
+    <div class="app-header-space"></div>
+    <div class="app-header-title">街を楽しもう</div>
+    <div class="app-header-space"></div>
+  </div>
+
+  <!-- クーポン -->
+  <div class="coupon-section">
+    <div class="sec-title">クーポン</div>
+    <div class="coupon-badges">
+      <div class="badge badge-new">
+        店舗<br>クーポン<br><span class="badge-sub">🆕 新着</span>
+      </div>
+      <div class="badge badge-popular">
+        店舗<br>クーポン<br><span class="badge-sub">♥ 人気</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- スポット検索 -->
+  <div class="spot-section">
+    <div class="spot-header">スポット検索</div>
+    <div id="map"></div>
+  </div>
+
+  <!-- おすすめ店舗 -->
+  <div class="recommend-section">
+    <div class="sec-title">おすすめ店舗</div>
+    <div class="shop-scroll" id="shopScroll">
+      <div class="shop-chip" onclick="openDetail(0)">
+        <div class="shop-avatar">🧀</div>
+        <div class="shop-chip-name">北の大地チーズ工房</div>
+      </div>
+      <div class="shop-chip" onclick="openDetail(1)">
+        <div class="shop-avatar">☕</div>
+        <div class="shop-chip-name">支笏湖珈琲 清流亭</div>
+      </div>
+      <div class="shop-chip" onclick="openDetail(2)">
+        <div class="shop-avatar">🍡</div>
+        <div class="shop-chip-name">千歳和菓子 清月堂</div>
+      </div>
+      <div class="shop-chip" onclick="openDetail(3)">
+        <div class="shop-avatar">🐟</div>
+        <div class="shop-chip-name">鮮魚市場 千歳丸</div>
+      </div>
+      <div class="shop-chip" onclick="openDetail(4)">
+        <div class="shop-avatar">🍖</div>
+        <div class="shop-chip-name">千歳ジンギスカン 羊の里</div>
+      </div>
+    </div>
+  </div>
+
+  <button class="home-fab" onclick="location.href='chitose_home.html'">HOME</button>
+</div>
+
+<!-- ===== SCREEN 2: スポット詳細 ===== -->
+<div id="screen2" style="display:none; padding-bottom:80px;">
+  <div class="app-header">
+    <div class="app-header-back" onclick="closeDetail()">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m15 18-6-6 6-6"/></svg>
+    </div>
+    <div class="app-header-title" id="detailHeaderTitle">スポット詳細</div>
+    <div class="app-header-space"></div>
+  </div>
+
+  <div class="store-hero" id="storeHero">
+    <div class="store-hero-overlay"></div>
+    <span id="storeEmoji" style="position:relative;z-index:1;font-size:72px;"></span>
+  </div>
+
+  <div class="store-info-card">
+    <div class="store-name" id="storeName"></div>
+    <div class="store-meta">
+      <div class="store-meta-row">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span id="storeHours"></span>
+      </div>
+      <div class="store-meta-row">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <span id="storeAddr"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="store-actions">
+    <button class="action-btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.8 19.8 0 0 1 3.09 4.18 2 2 0 0 1 5.07 2h3a2 2 0 0 1 2 1.72c.13 1 .37 1.97.72 2.9a2 2 0 0 1-.45 2.11L9.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.93.35 1.9.59 2.9.72A2 2 0 0 1 22 16.92z"/></svg>
+      電話
+    </button>
+    <button class="action-btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      保存
+    </button>
+  </div>
+
+  <div class="tab-bar">
+    <div class="tab-item active" id="tab-coupon" onclick="switchTab('coupon')">クーポン</div>
+    <div class="tab-item" id="tab-detail" onclick="switchTab('detail')">詳細</div>
+  </div>
+
+  <!-- クーポンタブ -->
+  <div class="tab-content active" id="content-coupon">
+    <div class="coupon-card">
+      <div class="coupon-header">
+        <div class="coupon-type">🏷 店舗クーポン</div>
+        <div class="coupon-title" id="couponTitle">クーポンを読み込み中...</div>
+      </div>
+      <div class="coupon-body">
+        <div class="coupon-expiry">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          有効期限：2026年9月30日
+        </div>
+        <div class="coupon-desc" id="couponDesc"></div>
+        <div class="coupon-divider"></div>
+
+        <div class="qr-scan-status" id="qrStatus">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          QRコードを読み取りました
+        </div>
+
+        <button class="qr-btn" id="qrBtn" onclick="openCamera()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+            <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="4" height="4"/>
+            <line x1="20" y1="14" x2="20" y2="18"/><line x1="20" y1="18" x2="18" y2="18"/>
+          </svg>
+          QRコードを読み取る
+        </button>
+        <button class="use-btn" id="useBtn" onclick="useCoupon()" disabled>クーポンを使う</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 詳細タブ -->
+  <div class="tab-content" id="content-detail">
+    <div class="detail-section">
+      <div class="detail-section-title">店舗情報</div>
+      <div class="detail-row">
+        <div class="detail-th">営業時間</div>
+        <div class="detail-td" id="detailHours"></div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-th">定休日</div>
+        <div class="detail-td" id="detailClosed"></div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-th">住所</div>
+        <div class="detail-td" id="detailAddr"></div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-th">電話番号</div>
+        <div class="detail-td" id="detailTel"></div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-th">支払方法</div>
+        <div class="detail-td">現金・クレジットカード・PayPay</div>
+      </div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">ジャンル</div>
+      <div class="tag-row" id="detailTags"></div>
+    </div>
+  </div>
+
+  <button class="home-fab" onclick="location.href='chitose_home.html'">HOME</button>
+</div>
+
+<!-- ===== カメラモーダル ===== -->
+<div class="camera-modal" id="cameraModal">
+  <div class="camera-view">
+    <div class="scan-frame">
+      <div class="scan-corner sc-tl"></div>
+      <div class="scan-corner sc-tr"></div>
+      <div class="scan-corner sc-bl"></div>
+      <div class="scan-corner sc-br"></div>
+      <div class="scan-line" id="scanLine"></div>
+    </div>
+    <div class="camera-success" id="cameraSuccess">
+      <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      <div class="camera-success-text">QR読み取り完了！</div>
+    </div>
+  </div>
+  <div class="camera-label">店舗のQRコードを枠内に向けてください</div>
+  <button class="camera-close" onclick="closeCamera()">キャンセル</button>
+</div>
+
+<!-- ===== クーポン使用済みモーダル ===== -->
+<div class="used-modal" id="usedModal">
+  <div class="used-card">
+    <div class="used-icon">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <div class="used-title">クーポン使用完了</div>
+    <div class="used-sub" id="usedSubText"></div>
+    <div class="used-stamp">使用済み</div>
+    <button class="used-close" onclick="closeUsed()">閉じる</button>
+  </div>
+</div>
+
+<script>
+  // ===== 店舗データ =====
+  const stores = [
+    {
+      name: '北の大地チーズ工房',
+      emoji: '🧀',
+      hours: '10:00〜18:00',
+      closed: '火曜日',
+      addr: '千歳市泉沢1007番地',
+      tel: '0123-XX-XXXX',
+      tags: ['チーズ', '乳製品', 'テイクアウト', 'お土産'],
+      couponTitle: '特製チーズ詰め合わせ10%OFF',
+      couponDesc: '1,000円以上のお買い上げで特製チーズ詰め合わせが10%OFFになります。スタッフにクーポンをご提示ください。',
+      lat: 42.826, lng: 141.648, color: '#f7b731',
+    },
+    {
+      name: '支笏湖珈琲 清流亭',
+      emoji: '☕',
+      hours: '9:00〜17:00',
+      closed: '水曜日',
+      addr: '千歳市支笏湖温泉番外地',
+      tel: '0123-XX-XXXX',
+      tags: ['カフェ', 'スイーツ', '景観', 'テイクアウト'],
+      couponTitle: 'コーヒー1杯無料サービス',
+      couponDesc: '食事（800円以上）のご注文でコーヒー1杯を無料でご提供します。',
+      lat: 42.818, lng: 141.655, color: '#6d4c41',
+    },
+    {
+      name: '千歳和菓子 清月堂',
+      emoji: '🍡',
+      hours: '9:00〜19:00',
+      closed: '月曜日',
+      addr: '千歳市千代田町2丁目3番地',
+      tel: '0123-XX-XXXX',
+      tags: ['和菓子', 'お土産', '老舗'],
+      couponTitle: 'お買上500円以上で和菓子1個プレゼント',
+      couponDesc: '500円以上のお買い上げで季節の和菓子1個をプレゼントします。ご利用は1日1回・1家族1回限りです。',
+      lat: 42.823, lng: 141.651, color: '#e91e63',
+    },
+    {
+      name: '鮮魚市場 千歳丸',
+      emoji: '🐟',
+      hours: '8:00〜18:00',
+      closed: '日曜日',
+      addr: '千歳市北栄2丁目8番地',
+      tel: '0123-XX-XXXX',
+      tags: ['海産物', '鮮魚', 'お土産', '北海道グルメ'],
+      couponTitle: 'ほたて貝柱パック100円引き',
+      couponDesc: '北海道産ほたて貝柱1パック（200g以上）が100円引きになります。',
+      lat: 42.821, lng: 141.645, color: '#0288d1',
+    },
+    {
+      name: '千歳ジンギスカン 羊の里',
+      emoji: '🍖',
+      hours: '11:00〜21:00（LO 20:30）',
+      closed: '無休',
+      addr: '千歳市末広4丁目2番地',
+      tel: '0123-XX-XXXX',
+      tags: ['ジンギスカン', '北海道グルメ', '宴会'],
+      couponTitle: 'ランチセット100円引き',
+      couponDesc: '平日ランチタイム（11:00〜14:00）のセットメニューが100円引きになります。',
+      lat: 42.815, lng: 141.652, color: '#43a047',
+    },
+  ];
+
+  // ===== Leafletマップ =====
+  const map = L.map('map', { zoomControl: true, attributionControl: true })
+    .setView([42.822, 141.651], 14);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    maxZoom: 19,
+  }).addTo(map);
+
+  stores.forEach((s, i) => {
+    const icon = L.divIcon({
+      html: `<div style="width:34px;height:34px;border-radius:50%;background:${s.color};display:flex;align-items:center;justify-content:center;font-size:16px;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3);">${s.emoji}</div>`,
+      className: '', iconSize: [34, 34], iconAnchor: [17, 34],
+    });
+    L.marker([s.lat, s.lng], { icon }).addTo(map)
+      .bindPopup(`<b>${s.name}</b><br><small>${s.hours}</small><br><a href="#" onclick="openDetail(${i});return false;" style="color:#2d2dcc;font-weight:700;">詳しく見る →</a>`);
+  });
+
+  // ===== 画面遷移 =====
+  function openDetail(idx) {
+    const s = stores[idx];
+    document.getElementById('screen1').style.display = 'none';
+    document.getElementById('screen2').style.display = 'block';
+    window.scrollTo(0, 0);
+
+    document.getElementById('detailHeaderTitle').textContent = s.name;
+    document.getElementById('storeName').textContent = s.name;
+    document.getElementById('storeEmoji').textContent = s.emoji;
+    document.getElementById('storeHours').textContent = s.hours;
+    document.getElementById('storeAddr').textContent = s.addr;
+    document.getElementById('couponTitle').textContent = s.couponTitle;
+    document.getElementById('couponDesc').textContent = s.couponDesc;
+    document.getElementById('detailHours').textContent = s.hours;
+    document.getElementById('detailClosed').textContent = s.closed;
+    document.getElementById('detailAddr').textContent = s.addr;
+    document.getElementById('detailTel').textContent = s.tel;
+    document.getElementById('storeHero').style.background = `linear-gradient(135deg, ${s.color}30, ${s.color}60)`;
+    document.getElementById('detailTags').innerHTML = s.tags.map(t => `<span class="genre-tag">${t}</span>`).join('');
+    document.getElementById('usedSubText').textContent = `「${s.couponTitle}」を使用しました。`;
+
+    // クーポン状態リセット
+    document.getElementById('qrStatus').classList.remove('show');
+    document.getElementById('qrBtn').style.display = 'flex';
+    document.getElementById('useBtn').classList.remove('ready');
+    document.getElementById('useBtn').disabled = true;
+    switchTab('coupon');
+  }
+
+  function closeDetail() {
+    document.getElementById('screen2').style.display = 'none';
+    document.getElementById('screen1').style.display = 'block';
+    window.scrollTo(0, 0);
+    setTimeout(() => map.invalidateSize(), 100);
+  }
+
+  // ===== タブ切り替え =====
+  function switchTab(name) {
+    ['coupon','detail'].forEach(t => {
+      document.getElementById('tab-' + t).classList.toggle('active', t === name);
+      document.getElementById('content-' + t).classList.toggle('active', t === name);
+    });
+  }
+
+  // ===== QRカメラ =====
+  function openCamera() {
+    document.getElementById('cameraSuccess').classList.remove('show');
+    document.getElementById('scanLine').style.animationPlayState = 'running';
+    document.getElementById('cameraModal').classList.add('open');
+
+    // 2.5秒後にQR読み取り成功をシミュレート
+    setTimeout(() => {
+      document.getElementById('scanLine').style.animationPlayState = 'paused';
+      document.getElementById('cameraSuccess').classList.add('show');
+
+      setTimeout(() => {
+        closeCamera();
+        document.getElementById('qrStatus').classList.add('show');
+        document.getElementById('qrBtn').style.display = 'none';
+        const btn = document.getElementById('useBtn');
+        btn.classList.add('ready');
+        btn.disabled = false;
+      }, 1400);
+    }, 2500);
+  }
+
+  function closeCamera() {
+    document.getElementById('cameraModal').classList.remove('open');
+  }
+
+  // ===== クーポン使用 =====
+  function useCoupon() {
+    document.getElementById('usedModal').classList.add('open');
+  }
+
+  function closeUsed() {
+    document.getElementById('usedModal').classList.remove('open');
+    // 使用済みにしてボタン無効化
+    document.getElementById('useBtn').classList.remove('ready');
+    document.getElementById('useBtn').disabled = true;
+    document.getElementById('useBtn').textContent = '使用済み';
+    document.getElementById('qrStatus').classList.remove('show');
+  }
+</script>
+</body>
+</html>
