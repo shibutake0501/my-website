@@ -1381,7 +1381,6 @@
             <div class="ev-card-footer">
               <div>
                 <div class="ev-fee">参加費：${ev.fee}</div>
-                ${ev.seats > 0 ? `<div class="ev-seats">残り ${ev.seats} 席</div>` : ''}
               </div>
               <button class="ev-apply-btn ${disabled ? 'disabled' : ''}" ${disabled ? 'disabled' : `onclick="event.stopPropagation();openDetail(${ev.id})"`}>
                 ${disabled ? '受付終了' : '詳細・申込'}
