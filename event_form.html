@@ -962,32 +962,6 @@
 
       <div class="notice-box" id="detailNotice"></div>
 
-      <div class="seats-bar-wrap" id="seatsWrap">
-        <div class="seats-bar-lbl">
-          <span>残席状況</span>
-          <span class="seats-remain" id="seatsRemain"></span>
-        </div>
-        <div class="seats-bar-track">
-          <div class="seats-bar-fill" id="seatsBar"></div>
-        </div>
-      </div>
-
-      <div class="mynumber-box">
-        <div class="mynumber-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="2" y="5" width="20" height="14" rx="2"/>
-            <circle cx="8" cy="12" r="2"/>
-            <line x1="12" y1="9" x2="18" y2="9"/>
-            <line x1="12" y1="12" x2="18" y2="12"/>
-            <line x1="12" y1="15" x2="15" y2="15"/>
-          </svg>
-        </div>
-        <div class="mynumber-text">
-          <div class="mynumber-ttl">マイナンバーカードで申込が簡単に</div>
-          <div class="mynumber-sub">次の申込フォームでマイナポータル連携を行うと、氏名・住所・生年月日・性別が自動入力されます（電話番号・メールは手動入力）。</div>
-        </div>
-      </div>
-
       <button class="btn-primary-lg" id="applyBtn" onclick="goTo(3)">
         このイベントに申し込む
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
@@ -1031,22 +1005,6 @@
           申請者情報
         </div>
 
-        <div class="mynumber-banner">
-          <div class="mn-icon">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="2" y="5" width="20" height="14" rx="2"/>
-              <circle cx="8" cy="12" r="2"/>
-              <line x1="12" y1="9" x2="18" y2="9"/>
-              <line x1="12" y1="12" x2="18" y2="12"/>
-            </svg>
-          </div>
-          <div class="mn-text">
-            <div class="mn-ttl">マイナンバーカードで自動入力</div>
-            <div class="mn-sub">氏名・住所・生年月日・性別をマイナポータルから自動入力できます</div>
-          </div>
-          <button class="mn-btn" onclick="autoFill()">カードで自動入力</button>
-        </div>
-
         <div class="form-grid">
           <div class="field">
             <div class="field-label">氏名（漢字）<span class="req">必須</span></div>
@@ -1071,11 +1029,6 @@
               <label class="gender-opt"><input type="radio" name="f_gender" id="f_gender_n" value="none"> 回答しない</label>
             </div>
           </div>
-        </div>
-
-        <div class="myna-manual-note">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#cc8800" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          電話番号・メールアドレスはマイナンバーカードに記録されていないため、手動でご入力ください。
         </div>
 
         <div class="form-grid">
@@ -1615,13 +1568,23 @@
       if (el) companions.push(el.value || `同行者${i}（未入力）`);
     }
 
+    const defaults = {
+      f_name:  '千歳　太郎',
+      f_kana:  'チトセ　タロウ',
+      f_birth: '1985/04/15',
+      f_phone: '0123456789',
+      f_email: 'taro.chitose@example.com',
+      f_addr:  '北海道千歳市千代田町6丁目7番地',
+    };
+    const v = id => document.getElementById(id).value || defaults[id];
+
     document.getElementById('confirmTable').innerHTML = `
-      <div class="confirm-tr"><div class="confirm-th">氏名</div><div class="confirm-td">${document.getElementById('f_name').value || '—'}</div></div>
-      <div class="confirm-tr"><div class="confirm-th">フリガナ</div><div class="confirm-td">${document.getElementById('f_kana').value || '—'}</div></div>
-      <div class="confirm-tr"><div class="confirm-th">生年月日</div><div class="confirm-td">${document.getElementById('f_birth').value || '—'}</div></div>
-      <div class="confirm-tr"><div class="confirm-th">電話番号</div><div class="confirm-td">${document.getElementById('f_phone').value || '—'}</div></div>
-      <div class="confirm-tr"><div class="confirm-th">メール</div><div class="confirm-td">${document.getElementById('f_email').value || '—'}</div></div>
-      <div class="confirm-tr"><div class="confirm-th">住所</div><div class="confirm-td">${document.getElementById('f_addr').value || '—'}</div></div>
+      <div class="confirm-tr"><div class="confirm-th">氏名</div><div class="confirm-td">${v('f_name')}</div></div>
+      <div class="confirm-tr"><div class="confirm-th">フリガナ</div><div class="confirm-td">${v('f_kana')}</div></div>
+      <div class="confirm-tr"><div class="confirm-th">生年月日</div><div class="confirm-td">${v('f_birth')}</div></div>
+      <div class="confirm-tr"><div class="confirm-th">電話番号</div><div class="confirm-td">${v('f_phone')}</div></div>
+      <div class="confirm-tr"><div class="confirm-th">メール</div><div class="confirm-td">${v('f_email')}</div></div>
+      <div class="confirm-tr"><div class="confirm-th">住所</div><div class="confirm-td">${v('f_addr')}</div></div>
       <div class="confirm-tr"><div class="confirm-th">参加人数</div><div class="confirm-td" style="font-weight:700;color:#0017C1;">${participantCount} 名</div></div>
       ${companions.length > 0 ? `<div class="confirm-tr"><div class="confirm-th">同行者</div><div class="confirm-td">${companions.join('、')}</div></div>` : ''}
       ${document.getElementById('f_note').value ? `<div class="confirm-tr"><div class="confirm-th">備考</div><div class="confirm-td">${document.getElementById('f_note').value}</div></div>` : ''}
