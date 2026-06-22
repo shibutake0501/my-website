@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>子育て支援サービス利用登録 | 千歳市</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic', sans-serif;
+      background: #f0f0f8;
+      color: #17181c;
+      min-height: 100vh;
+    }
+
+    /* ===== ヘッダー ===== */
+    .app-header {
+      background: #fff;
+      padding: 14px 16px;
+      display: flex; align-items: center; gap: 12px;
+      border-bottom: 0.5px solid #e0e0e8;
+      position: sticky; top: 0; z-index: 200;
+    }
+    .app-header-back { color: #333; cursor: pointer; display: flex; align-items: center; }
+    .app-header-title { flex: 1; font-size: 17px; font-weight: 700; color: #111; text-align: center; }
+    .app-header-space { width: 24px; }
+
+    /* ===== ステップバー ===== */
+    .step-wrap {
+      background: #fff;
+      padding: 16px 16px 14px;
+      border-bottom: 1px solid #e8e8f0;
+    }
+    .step-row { display: flex; align-items: flex-start; position: relative; }
+    .step-row::before {
+      content: ''; position: absolute;
+      top: 16px; left: 0; right: 0; height: 2px;
+      background: #e0e0e8; z-index: 0;
+    }
+    .step-item {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; gap: 5px; position: relative; z-index: 1;
+    }
+    .step-circle {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: #e0e0e8;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700; color: #999;
+    }
+    .step-circle.done { background: #2d2dcc; color: #fff; }
+    .step-circle.current { background: #ff6b35; color: #fff; box-shadow: 0 0 0 4px rgba(255,107,53,.2); }
+    .step-label { font-size: 10px; color: #999; text-align: center; line-height: 1.3; }
+    .step-label.done { color: #2d2dcc; font-weight: 600; }
+    .step-label.current { color: #ff6b35; font-weight: 700; }
+
+    /* ===== セクションカード ===== */
+    .section-card {
+      background: #fff; border-radius: 14px;
+      padding: 20px 16px; margin: 12px 12px 0;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    }
+    .section-head {
+      font-size: 15px; font-weight: 700; color: #111;
+      margin-bottom: 18px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .section-icon {
+      width: 28px; height: 28px; border-radius: 8px;
+      background: #e8eeff; color: #2d2dcc;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* ===== フォーム部品 ===== */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+    .form-grid.single { grid-template-columns: 1fr; }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field-label {
+      font-size: 13px; font-weight: 700; color: #333;
+      display: flex; align-items: center; gap: 5px;
+    }
+    .req { font-size: 11px; background: #c62828; color: #fff; padding: 1px 5px; border-radius: 3px; font-weight: 700; }
+    .opt { font-size: 11px; background: #e0e0e8; color: #666; padding: 1px 5px; border-radius: 3px; }
+    .text-input {
+      width: 100%; height: 46px;
+      border: 1.5px solid #ccc; border-radius: 10px;
+      padding: 0 13px; font-size: 15px; color: #111;
+      font-family: inherit; outline: none;
+      transition: border-color .15s, box-shadow .15s;
+      background: #fff; min-width: 0;
+    }
+    .text-input:focus { border-color: #2d2dcc; box-shadow: 0 0 0 3px rgba(45,45,204,.1); }
+    .text-input.filled { background: #f8faff; border-color: #b0baee; }
+    textarea.text-input { height: 80px; padding-top: 11px; resize: none; }
+    .text-select {
+      width: 100%; height: 46px;
+      border: 1.5px solid #ccc; border-radius: 10px;
+      padding: 0 13px; font-size: 15px; color: #111;
+      font-family: inherit; outline: none;
+      background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 12px center;
+      appearance: none; min-width: 0;
+      transition: border-color .15s;
+    }
+    .text-select:focus { border-color: #2d2dcc; box-shadow: 0 0 0 3px rgba(45,45,204,.1); }
+    .text-select.filled { background-color: #f8faff; border-color: #b0baee; }
+    .field-hint { font-size: 11px; color: #888; line-height: 1.5; }
+    .radio-group { display: flex; gap: 16px; flex-wrap: wrap; padding: 6px 0; }
+    .radio-opt { display: flex; align-items: center; gap: 6px; font-size: 14px; color: #333; cursor: pointer; }
+    .radio-opt input[type="radio"] { width: 17px; height: 17px; accent-color: #2d2dcc; cursor: pointer; }
+    .divider { height: 1px; background: #f0f0f8; margin: 16px 0; }
+
+    /* ===== サービス選択カード ===== */
+    .service-list { display: flex; flex-direction: column; gap: 10px; }
+    .service-card {
+      border: 2px solid #e0e0e8; border-radius: 12px;
+      padding: 14px 16px; cursor: pointer;
+      transition: border-color .15s, background .15s;
+      display: flex; align-items: flex-start; gap: 12px;
+    }
+    .service-card:has(input:checked) {
+      border-color: #2d2dcc; background: #f4f6ff;
+    }
+    .service-card input[type="checkbox"] {
+      width: 20px; height: 20px; accent-color: #2d2dcc;
+      cursor: pointer; flex-shrink: 0; margin-top: 2px;
+    }
+    .service-card-body { flex: 1; }
+    .service-card-title { font-size: 14px; font-weight: 700; color: #111; margin-bottom: 4px; }
+    .service-card-desc { font-size: 12px; color: #666; line-height: 1.5; }
+    .service-card-badge {
+      font-size: 11px; padding: 2px 8px; border-radius: 10px;
+      background: #e8eeff; color: #2d2dcc; font-weight: 600;
+      display: inline-block; margin-top: 5px;
+    }
+
+    /* ===== ボタン ===== */
+    .btn-row { display: flex; gap: 10px; margin: 14px 12px 0; padding-bottom: 32px; }
+    .btn-back {
+      height: 50px; padding: 0 22px;
+      background: #fff; border: 2px solid #ddd;
+      border-radius: 12px; font-size: 15px; font-weight: 700;
+      color: #666; cursor: pointer; font-family: inherit;
+    }
+    .btn-back:hover { border-color: #999; }
+    .btn-next {
+      flex: 1; height: 50px;
+      background: #2d2dcc; border: none; border-radius: 12px;
+      font-size: 16px; font-weight: 700; color: #fff;
+      cursor: pointer; font-family: inherit;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: background .15s;
+    }
+    .btn-next:hover { background: #2424aa; }
+
+    /* ===== 確認テーブル ===== */
+    .confirm-block { margin-bottom: 16px; }
+    .confirm-block-title {
+      font-size: 13px; font-weight: 700; color: #2d2dcc;
+      padding-bottom: 6px; border-bottom: 1px solid #e8e8f0; margin-bottom: 8px;
+    }
+    .confirm-table { border-radius: 10px; overflow: hidden; border: 1px solid #e0e0e8; }
+    .confirm-tr { display: flex; border-bottom: 1px solid #eee; }
+    .confirm-tr:last-child { border-bottom: none; }
+    .confirm-th {
+      width: 120px; flex-shrink: 0;
+      padding: 11px 14px; background: #f8f8fc;
+      font-size: 12px; color: #666; font-weight: 600;
+    }
+    .confirm-td { padding: 11px 14px; font-size: 13px; color: #111; flex: 1; font-weight: 500; }
+
+    .agree-box {
+      margin: 0 12px 4px;
+      border: 1px solid #e0e0e8; border-radius: 12px;
+      padding: 14px 16px;
+      display: flex; align-items: flex-start; gap: 12px;
+      background: #fff;
+    }
+    .agree-box input[type="checkbox"] {
+      width: 20px; height: 20px; accent-color: #2d2dcc;
+      margin-top: 1px; cursor: pointer; flex-shrink: 0;
+    }
+    .agree-text { font-size: 13px; color: #444; line-height: 1.7; }
+    .agree-link { color: #2d2dcc; text-decoration: underline; cursor: pointer; }
+
+    /* ===== 完了 ===== */
+    .complete-hero {
+      background: linear-gradient(135deg, #1a2a8a, #2d2dcc, #5a5aee);
+      border-radius: 18px; margin: 16px 12px 0;
+      padding: 40px 24px; text-align: center; color: #fff;
+    }
+    .complete-check {
+      width: 76px; height: 76px; border-radius: 50%;
+      background: rgba(255,255,255,.2);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 18px;
+    }
+    .complete-title { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+    .complete-sub { font-size: 14px; color: rgba(255,255,255,.75); }
+    .receipt-box {
+      background: #fff; border: 2px solid #2d2dcc;
+      border-radius: 14px; padding: 20px; text-align: center;
+      margin: 14px 12px 0;
+      box-shadow: 0 4px 16px rgba(45,45,204,.1);
+    }
+    .receipt-lbl { font-size: 12px; color: #888; margin-bottom: 5px; }
+    .receipt-num { font-size: 26px; font-weight: 700; color: #2d2dcc; letter-spacing: .06em; margin-bottom: 3px; }
+    .receipt-date { font-size: 12px; color: #aaa; }
+    .complete-info {
+      background: #fff; border-radius: 14px;
+      margin: 12px 12px 0; padding: 18px 16px;
+    }
+    .complete-info-title { font-size: 14px; font-weight: 700; color: #111; margin-bottom: 12px; }
+    .complete-info-row {
+      display: flex; align-items: flex-start; gap: 10px;
+      font-size: 13px; color: #444; line-height: 1.6; margin-bottom: 10px;
+    }
+    .complete-info-icon { color: #2d2dcc; flex-shrink: 0; margin-top: 2px; }
+    .btn-done {
+      display: block; margin: 14px 12px 32px;
+      height: 50px; background: #2d2dcc; border: none;
+      border-radius: 12px; font-size: 16px; font-weight: 700;
+      color: #fff; cursor: pointer; font-family: inherit;
+      width: calc(100% - 24px); text-decoration: none;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .15s;
+    }
+    .btn-done:hover { background: #2424aa; }
+
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    @media (max-width: 480px) {
+      .form-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="app-header-back" onclick="handleBack()">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m15 18-6-6 6-6"/></svg>
+  </div>
+  <div class="app-header-title">子育て支援サービス利用登録</div>
+  <div class="app-header-space"></div>
+</div>
+
+<div class="step-wrap" id="stepWrap">
+  <div class="step-row">
+    <div class="step-item">
+      <div class="step-circle current" id="sc1">1</div>
+      <div class="step-label current" id="sl1">保護者<br>情報</div>
+    </div>
+    <div class="step-item">
+      <div class="step-circle" id="sc2">2</div>
+      <div class="step-label" id="sl2">児童<br>情報</div>
+    </div>
+    <div class="step-item">
+      <div class="step-circle" id="sc3">3</div>
+      <div class="step-label" id="sl3">希望<br>サービス</div>
+    </div>
+    <div class="step-item">
+      <div class="step-circle" id="sc4">4</div>
+      <div class="step-label" id="sl4">確認・<br>送信</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== STEP 1: 保護者情報 ===== -->
+<div class="screen active" id="step1">
+  <div class="section-card">
+    <div class="section-head">
+      <div class="section-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      </div>
+      保護者情報
+    </div>
+
+    <div class="form-grid">
+      <div class="field">
+        <div class="field-label">氏名（漢字）<span class="req">必須</span></div>
+        <input class="text-input" type="text" id="p_name" placeholder="千歳　花子">
+      </div>
+      <div class="field">
+        <div class="field-label">氏名（フリガナ）<span class="req">必須</span></div>
+        <input class="text-input" type="text" id="p_kana" placeholder="チトセ　ハナコ">
+      </div>
+    </div>
+
+    <div class="form-grid">
+      <div class="field">
+        <div class="field-label">電話番号<span class="req">必須</span></div>
+        <input class="text-input" type="tel" id="p_tel" placeholder="0123456789">
+        <div class="field-hint">当日連絡がとれる番号</div>
+      </div>
+      <div class="field">
+        <div class="field-label">メールアドレス<span class="req">必須</span></div>
+        <input class="text-input" type="email" id="p_email" placeholder="example@email.com">
+      </div>
+    </div>
+
+    <div class="form-grid single">
+      <div class="field">
+        <div class="field-label">住所<span class="req">必須</span></div>
+        <input class="text-input" type="text" id="p_addr" placeholder="北海道千歳市千代田町6丁目7番地">
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn-back" onclick="location.href='denshi_shinsei.html'">← 戻る</button>
+    <button class="btn-next" onclick="goStep(2)">
+      次へ（児童情報）
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- ===== STEP 2: 児童情報 ===== -->
+<div class="screen" id="step2">
+  <div class="section-card">
+    <div class="section-head">
+      <div class="section-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a8.5 8.5 0 0 1 13 0"/></svg>
+      </div>
+      お子さまの情報
+    </div>
+
+    <div class="form-grid">
+      <div class="field">
+        <div class="field-label">氏名（漢字）<span class="req">必須</span></div>
+        <input class="text-input" type="text" id="c_name" placeholder="千歳　一郎">
+      </div>
+      <div class="field">
+        <div class="field-label">氏名（フリガナ）<span class="req">必須</span></div>
+        <input class="text-input" type="text" id="c_kana" placeholder="チトセ　イチロウ">
+      </div>
+    </div>
+
+    <div class="form-grid">
+      <div class="field">
+        <div class="field-label">生年月日<span class="req">必須</span></div>
+        <input class="text-input" type="text" id="c_birth" placeholder="例：2021/08/20">
+      </div>
+      <div class="field">
+        <div class="field-label">性別<span class="req">必須</span></div>
+        <div class="radio-group">
+          <label class="radio-opt"><input type="radio" name="c_gender" id="c_gender_m" value="男"> 男の子</label>
+          <label class="radio-opt"><input type="radio" name="c_gender" id="c_gender_f" value="女"> 女の子</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="form-grid single">
+      <div class="field">
+        <div class="field-label">アレルギー・配慮事項<span class="opt">任意</span></div>
+        <textarea class="text-input" id="c_allergy" placeholder="食物アレルギーや健康上の配慮事項があればご記入ください"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn-back" onclick="goStep(1)">戻る</button>
+    <button class="btn-next" onclick="goStep(3)">
+      次へ（希望サービス）
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- ===== STEP 3: 希望サービス選択 ===== -->
+<div class="screen" id="step3">
+  <div class="section-card">
+    <div class="section-head">
+      <div class="section-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      </div>
+      利用を希望するサービス
+      <span style="font-size:11px;font-weight:400;color:#888;margin-left:4px;">複数選択可</span>
+    </div>
+
+    <div class="service-list">
+      <label class="service-card">
+        <input type="checkbox" id="svc_ichiji" value="一時預かり保育">
+        <div class="service-card-body">
+          <div class="service-card-title">一時預かり保育</div>
+          <div class="service-card-desc">保護者の就労・傷病・育児疲れ等の理由により、一時的にお子さまを保育所等で預かります。</div>
+          <span class="service-card-badge">対象：生後6ヶ月〜就学前</span>
+        </div>
+      </label>
+
+      <label class="service-card">
+        <input type="checkbox" id="svc_byoji" value="病児・病後児保育">
+        <div class="service-card-body">
+          <div class="service-card-title">病児・病後児保育</div>
+          <div class="service-card-desc">お子さまが病気・回復期のため通常の保育が困難な場合に、病院や保育施設で一時的に預かります。</div>
+          <span class="service-card-badge">対象：生後6ヶ月〜小学6年生</span>
+        </div>
+      </label>
+
+      <label class="service-card">
+        <input type="checkbox" id="svc_family" value="ファミリーサポートセンター">
+        <div class="service-card-body">
+          <div class="service-card-title">ファミリーサポートセンター</div>
+          <div class="service-card-desc">地域の援助会員がお子さまの送迎や預かりをサポートします。保育所送迎・習い事の送迎なども対象です。</div>
+          <span class="service-card-badge">対象：生後6ヶ月〜小学6年生</span>
+        </div>
+      </label>
+
+      <label class="service-card">
+        <input type="checkbox" id="svc_hiroba" value="子育てひろば">
+        <div class="service-card-body">
+          <div class="service-card-title">子育てひろば（育児相談・交流）</div>
+          <div class="service-card-desc">保護者同士の交流や育児相談ができる場です。専門スタッフによる相談受付も行っています。</div>
+          <span class="service-card-badge">対象：0〜3歳のお子さまと保護者</span>
+        </div>
+      </label>
+
+      <label class="service-card">
+        <input type="checkbox" id="svc_hogosha" value="保護者向け育児講座">
+        <div class="service-card-body">
+          <div class="service-card-title">保護者向け育児講座</div>
+          <div class="service-card-desc">離乳食・寝かしつけ・発達相談など、育児に役立つ講座を定期開催しています。</div>
+          <span class="service-card-badge">対象：就学前のお子さまの保護者</span>
+        </div>
+      </label>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="form-grid single">
+      <div class="field">
+        <div class="field-label">利用希望時期・その他ご要望<span class="opt">任意</span></div>
+        <textarea class="text-input" id="req_note" placeholder="例：4月から週2回程度の一時預かりを希望します"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn-back" onclick="goStep(2)">戻る</button>
+    <button class="btn-next" onclick="goStep(4)">
+      申込内容を確認する
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- ===== STEP 4: 確認 ===== -->
+<div class="screen" id="step4">
+  <div class="section-card">
+    <div class="section-head">
+      <div class="section-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      </div>
+      申込内容の確認
+    </div>
+    <div id="confirmContent"></div>
+  </div>
+
+  <div class="agree-box">
+    <input type="checkbox" id="agreeCb">
+    <div class="agree-text">
+      <span class="agree-link">個人情報の取り扱いについて</span>を確認し、同意のうえ申し込みます。登録後の変更・取消は子育て支援課（0123-24-3131）までご連絡ください。
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn-back" onclick="goStep(3)">戻る</button>
+    <button class="btn-next" onclick="submitForm()">
+      登録する
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- ===== 完了 ===== -->
+<div class="screen" id="stepDone">
+  <div class="complete-hero">
+    <div class="complete-check">
+      <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
+    </div>
+    <div class="complete-title">登録申込が完了しました</div>
+    <div class="complete-sub">受付番号をお控えください</div>
+  </div>
+
+  <div class="receipt-box">
+    <div class="receipt-lbl">受付番号</div>
+    <div class="receipt-num" id="receiptNum">KS-2026-000000</div>
+    <div class="receipt-date" id="receiptDate"></div>
+  </div>
+
+  <div class="complete-info">
+    <div class="complete-info-title">今後の流れ</div>
+    <div class="complete-info-row">
+      <div class="complete-info-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <div>登録申込受付後、<strong>約1週間以内</strong>にご登録のメールアドレスへ受付結果をお知らせします。</div>
+    </div>
+    <div class="complete-info-row">
+      <div class="complete-info-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      </div>
+      <div>サービスによっては、別途<strong>面談・書類提出</strong>が必要な場合があります。担当者よりご連絡します。</div>
+    </div>
+    <div class="complete-info-row">
+      <div class="complete-info-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.8 19.8 0 0 1 3.09 4.18 2 2 0 0 1 5.07 2h3a2 2 0 0 1 2 1.72c.13 1 .37 1.97.72 2.9a2 2 0 0 1-.45 2.11L9.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.93.35 1.9.59 2.9.72A2 2 0 0 1 22 16.92z"/></svg>
+      </div>
+      <div>お問い合わせ：<strong>子育て支援課</strong>　0123-24-3131（内線246）</div>
+    </div>
+  </div>
+
+  <a class="btn-done" href="denshi_shinsei.html">電子申請トップへ戻る</a>
+</div>
+
+<script>
+  let currentStep = 1;
+
+  const DEFAULTS = {
+    p_name:  '千歳　花子',
+    p_kana:  'チトセ　ハナコ',
+    p_tel:   '0123456789',
+    p_email: 'hanako.chitose@example.com',
+    p_addr:  '北海道千歳市千代田町6丁目7番地',
+    c_name:  '千歳　一郎',
+    c_kana:  'チトセ　イチロウ',
+    c_birth: '2021/08/20',
+  };
+
+  function prefill() {
+    Object.entries(DEFAULTS).forEach(([id, val]) => {
+      const el = document.getElementById(id);
+      if (el && !el.value) { el.value = val; el.classList.add('filled'); }
+    });
+    const gm = document.getElementById('c_gender_m');
+    if (gm && !document.querySelector('input[name="c_gender"]:checked')) gm.checked = true;
+    document.getElementById('svc_ichiji').checked = true;
+    document.getElementById('svc_family').checked = true;
+  }
+
+  function v(id) {
+    const el = document.getElementById(id);
+    return (el && el.value) ? el.value : (DEFAULTS[id] || '');
+  }
+
+  function goStep(n) {
+    const prev = currentStep <= 4 ? 'step' + currentStep : 'stepDone';
+    document.getElementById(prev).classList.remove('active');
+    if (n <= 4) {
+      document.getElementById('step' + n).classList.add('active');
+    } else {
+      document.getElementById('stepDone').classList.add('active');
+      document.getElementById('stepWrap').style.display = 'none';
+    }
+    currentStep = n;
+    updateStepBar(n);
+    if (n === 4) buildConfirm();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function updateStepBar(cur) {
+    for (let i = 1; i <= 4; i++) {
+      const c = document.getElementById('sc' + i);
+      const l = document.getElementById('sl' + i);
+      c.className = 'step-circle';
+      l.className = 'step-label';
+      if (i < cur) { c.classList.add('done'); c.innerHTML = '✓'; l.classList.add('done'); }
+      else if (i === cur) { c.classList.add('current'); c.textContent = i; l.classList.add('current'); }
+      else { c.textContent = i; }
+    }
+  }
+
+  function handleBack() {
+    if (currentStep === 1) { location.href = 'denshi_shinsei.html'; return; }
+    goStep(currentStep - 1);
+  }
+
+  function getSelectedServices() {
+    const ids = ['svc_ichiji', 'svc_byoji', 'svc_family', 'svc_hiroba', 'svc_hogosha'];
+    return ids
+      .filter(id => document.getElementById(id).checked)
+      .map(id => document.getElementById(id).value);
+  }
+
+  function buildConfirm() {
+    const gender = document.querySelector('input[name="c_gender"]:checked');
+    const genderVal = gender ? gender.value : '男';
+    const services = getSelectedServices();
+    const servicesHtml = services.length
+      ? services.map(s => `<div style="margin-bottom:3px;">・${s}</div>`).join('')
+      : '（未選択）';
+    const note = document.getElementById('req_note').value;
+
+    document.getElementById('confirmContent').innerHTML = `
+      <div class="confirm-block">
+        <div class="confirm-block-title">保護者情報</div>
+        <div class="confirm-table">
+          <div class="confirm-tr"><div class="confirm-th">氏名</div><div class="confirm-td">${v('p_name')}（${v('p_kana')}）</div></div>
+          <div class="confirm-tr"><div class="confirm-th">電話番号</div><div class="confirm-td">${v('p_tel')}</div></div>
+          <div class="confirm-tr"><div class="confirm-th">メール</div><div class="confirm-td">${v('p_email')}</div></div>
+          <div class="confirm-tr"><div class="confirm-th">住所</div><div class="confirm-td">${v('p_addr')}</div></div>
+        </div>
+      </div>
+      <div class="confirm-block">
+        <div class="confirm-block-title">お子さまの情報</div>
+        <div class="confirm-table">
+          <div class="confirm-tr"><div class="confirm-th">氏名</div><div class="confirm-td">${v('c_name')}（${v('c_kana')}）</div></div>
+          <div class="confirm-tr"><div class="confirm-th">生年月日</div><div class="confirm-td">${v('c_birth')}</div></div>
+          <div class="confirm-tr"><div class="confirm-th">性別</div><div class="confirm-td">${genderVal}</div></div>
+        </div>
+      </div>
+      <div class="confirm-block">
+        <div class="confirm-block-title">希望サービス</div>
+        <div class="confirm-table">
+          <div class="confirm-tr"><div class="confirm-th">サービス</div><div class="confirm-td">${servicesHtml}</div></div>
+          ${note ? `<div class="confirm-tr"><div class="confirm-th">ご要望</div><div class="confirm-td">${note}</div></div>` : ''}
+        </div>
+      </div>
+    `;
+  }
+
+  function submitForm() {
+    if (!document.getElementById('agreeCb').checked) {
+      alert('個人情報の取り扱いへの同意が必要です。');
+      return;
+    }
+    const num = 'KS-2026-' + String(Math.floor(Math.random() * 999999)).padStart(6, '0');
+    document.getElementById('receiptNum').textContent = num;
+    const now = new Date();
+    document.getElementById('receiptDate').textContent =
+      `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')} 受付`;
+
+    document.getElementById('step4').classList.remove('active');
+    document.getElementById('stepDone').classList.add('active');
+    document.getElementById('stepWrap').style.display = 'none';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  prefill();
+</script>
+</body>
+</html>
