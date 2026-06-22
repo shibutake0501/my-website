@@ -1500,6 +1500,25 @@
     next();
   }
 
+  // ===== 申請者情報 初期値セット =====
+  function prefillForm() {
+    const data = {
+      f_name:  '千歳　太郎',
+      f_kana:  'チトセ　タロウ',
+      f_birth: '1985/04/15',
+      f_phone: '0123456789',
+      f_email: 'taro.chitose@example.com',
+      f_email2:'taro.chitose@example.com',
+      f_addr:  '北海道千歳市千代田町6丁目7番地',
+    };
+    Object.entries(data).forEach(([id, val]) => {
+      const el = document.getElementById(id);
+      if (el && !el.value) { el.value = val; el.classList.add('filled'); }
+    });
+    const gm = document.getElementById('f_gender_m');
+    if (gm && !document.querySelector('input[name="f_gender"]:checked')) gm.checked = true;
+  }
+
   // ===== 参加人数ステッパー =====
   function changeCount(delta) {
     participantCount = Math.max(1, Math.min(5, participantCount + delta));
@@ -1632,6 +1651,7 @@
     if (n === 3) {
       currentFormStep = 1;
       nextFormStep(1);
+      prefillForm();
       document.getElementById('bc-current').textContent = '申込フォーム';
     }
 
