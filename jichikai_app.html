@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>自治会ミニアプリ</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic', sans-serif;
+      background: #f0f0f8;
+      display: flex;
+      justify-content: center;
+      padding: 20px 0 40px;
+    }
+
+    .phone {
+      width: 390px;
+      min-height: 780px;
+      background: #f0f0f8;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* ---- Header ---- */
+    .header {
+      background: #fff;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 0.5px solid #e0e0e8;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .back-btn {
+      width: 32px; height: 32px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: #333;
+    }
+    .back-btn.hidden { visibility: hidden; }
+    .header-title { flex: 1; text-align: center; font-size: 17px; font-weight: 600; color: #111; }
+    .header-sub { font-size: 12px; color: #888; font-weight: 400; }
+    .header-space { width: 32px; }
+    .header-action {
+      width: 32px; height: 32px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: #2d2dcc;
+    }
+
+    /* ---- Bottom Tab ---- */
+    .bottom-tab {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 390px;
+      background: #fff;
+      border-top: 0.5px solid #e0e0e8;
+      display: flex;
+      z-index: 20;
+    }
+    .tab-item {
+      flex: 1;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 8px 4px 10px;
+      cursor: pointer;
+      color: #999;
+      font-size: 11px;
+      gap: 4px;
+      transition: color 0.15s;
+    }
+    .tab-item.active { color: #2d2dcc; }
+    .tab-item svg { width: 24px; height: 24px; }
+    .tab-badge {
+      position: absolute;
+      top: 6px; right: calc(50% - 18px);
+      background: #e03030;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      border-radius: 10px;
+      padding: 1px 5px;
+      min-width: 16px;
+      text-align: center;
+    }
+    .tab-item { position: relative; }
+
+    /* ---- Screen ---- */
+    .screen { display: none; padding-bottom: 80px; }
+    .screen.active { display: block; }
+
+    /* ---- Sections / Cards ---- */
+    .section { margin-top: 10px; padding: 0 16px; }
+    .section-title {
+      font-size: 13px; font-weight: 700; color: #555;
+      margin: 14px 0 8px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .section-link { font-size: 12px; font-weight: 500; color: #2d2dcc; cursor: pointer; }
+
+    .card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 10px;
+    }
+    .card-row {
+      display: flex; align-items: flex-start; gap: 12px;
+    }
+    .card-icon {
+      width: 44px; height: 44px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; font-size: 22px;
+    }
+    .card-body { flex: 1; min-width: 0; }
+    .card-title { font-size: 15px; font-weight: 600; color: #111; margin-bottom: 4px; }
+    .card-meta { font-size: 12px; color: #888; margin-bottom: 6px; }
+    .card-desc { font-size: 13px; color: #555; line-height: 1.6; }
+
+    /* ---- Tags ---- */
+    .tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+    .tag {
+      font-size: 11px; padding: 3px 9px; border-radius: 20px; font-weight: 600;
+    }
+    .tag-green { background: #e0f4e8; color: #1a7a3a; }
+    .tag-blue { background: #e0e4f8; color: #2040a0; }
+    .tag-orange { background: #fff0e0; color: #b35a00; }
+    .tag-red { background: #fde8e8; color: #b00020; }
+    .tag-gray { background: #f0f0f0; color: #666; }
+    .tag-purple { background: #ede8f8; color: #5a2db0; }
+
+    /* ---- Buttons ---- */
+    .btn-primary {
+      display: flex; align-items: center; justify-content: center;
+      width: 100%; height: 48px;
+      background: #2d2dcc; color: #fff;
+      border: none; border-radius: 30px;
+      font-size: 16px; font-weight: 500; cursor: pointer;
+      text-decoration: none;
+      font-family: inherit;
+    }
+    .btn-primary:hover { background: #2424aa; }
+    .btn-primary.sm { height: 38px; font-size: 14px; }
+    .btn-outline {
+      display: flex; align-items: center; justify-content: center;
+      width: 100%; height: 48px;
+      background: #fff; color: #2d2dcc;
+      border: 1.5px solid #2d2dcc; border-radius: 30px;
+      font-size: 15px; font-weight: 500; cursor: pointer;
+      font-family: inherit;
+    }
+    .btn-outline.sm { height: 38px; font-size: 13px; }
+    .btn-ghost {
+      background: none; border: none; cursor: pointer;
+      color: #2d2dcc; font-size: 13px; font-weight: 500;
+      padding: 0; font-family: inherit;
+    }
+
+    /* ---- Read button ---- */
+    .read-btn {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      height: 40px; border-radius: 20px;
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      border: 1.5px solid #2d2dcc; background: #fff; color: #2d2dcc;
+      font-family: inherit; transition: all 0.2s;
+    }
+    .read-btn.done {
+      background: #e0e4f8; border-color: #b0b8e8; color: #555; cursor: default;
+    }
+
+    /* ---- Search bar ---- */
+    .search-bar {
+      background: #fff;
+      padding: 12px 16px;
+      display: flex; gap: 10px; align-items: center;
+    }
+    .search-input {
+      flex: 1; height: 42px;
+      border: 1.5px solid #d0d0e0; border-radius: 10px;
+      padding: 0 14px 0 38px;
+      font-size: 14px; color: #333;
+      background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") no-repeat 11px center;
+      outline: none;
+    }
+    .filter-btn {
+      height: 42px; padding: 0 16px;
+      background: #2d2dcc; color: #fff;
+      border: none; border-radius: 10px;
+      font-size: 14px; font-weight: 500; cursor: pointer;
+      white-space: nowrap; font-family: inherit;
+    }
+
+    /* ---- Divider ---- */
+    .divider { height: 1px; background: #e8e8f0; margin: 12px 0; }
+
+    /* ---- Notice detail ---- */
+    .notice-content {
+      font-size: 14px; line-height: 1.8; color: #333;
+      margin-bottom: 16px;
+    }
+    .attach-row {
+      display: flex; align-items: center; gap: 8px;
+      background: #f4f4fc; border-radius: 10px; padding: 10px 14px;
+      margin-bottom: 8px;
+    }
+    .attach-row span { font-size: 13px; color: #444; flex: 1; }
+    .attach-row .dl-btn { font-size: 12px; color: #2d2dcc; font-weight: 600; cursor: pointer; }
+
+    /* ---- Read status list ---- */
+    .status-bar-wrap { margin-bottom: 12px; }
+    .status-bar-label { display: flex; justify-content: space-between; font-size: 12px; color: #666; margin-bottom: 4px; }
+    .status-bar-bg { background: #e8e8f0; border-radius: 6px; height: 10px; }
+    .status-bar-fill { background: #2d2dcc; height: 10px; border-radius: 6px; }
+
+    .user-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 0; border-bottom: 0.5px solid #e8e8f0;
+    }
+    .user-avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: #e0e4f8; display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700; color: #2d2dcc; flex-shrink: 0;
+    }
+    .user-name { flex: 1; font-size: 14px; color: #222; }
+    .user-status { font-size: 12px; font-weight: 600; }
+    .user-status.read { color: #1a7a3a; }
+    .user-status.unread { color: #888; }
+
+    /* ---- Kairan (回覧板) ---- */
+    .kairan-card {
+      background: #fff; border-radius: 14px; padding: 16px; margin-bottom: 10px;
+      position: relative;
+    }
+    .kairan-num {
+      position: absolute; top: 12px; right: 14px;
+      font-size: 11px; color: #888;
+    }
+    .kairan-title { font-size: 15px; font-weight: 600; color: #111; margin-bottom: 6px; }
+    .kairan-meta { font-size: 12px; color: #888; margin-bottom: 10px; }
+    .route-list { margin-top: 8px; }
+    .route-item {
+      display: flex; align-items: center; gap: 10px; padding: 8px 0;
+      border-bottom: 0.5px solid #f0f0f0; font-size: 13px;
+    }
+    .route-item:last-child { border-bottom: none; }
+    .route-dot {
+      width: 28px; height: 28px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; flex-shrink: 0;
+    }
+    .route-dot.done { background: #e0f4e8; color: #1a7a3a; }
+    .route-dot.current { background: #2d2dcc; color: #fff; }
+    .route-dot.waiting { background: #f0f0f0; color: #aaa; }
+    .route-name { flex: 1; color: #333; }
+    .route-time { font-size: 11px; color: #888; }
+
+    /* ---- Event ---- */
+    .event-card {
+      background: #fff; border-radius: 14px; overflow: hidden; margin-bottom: 10px;
+    }
+    .event-header { background: #2d2dcc; padding: 14px 16px; }
+    .event-date { font-size: 13px; color: rgba(255,255,255,0.8); margin-bottom: 2px; }
+    .event-name { font-size: 16px; font-weight: 700; color: #fff; }
+    .event-body { padding: 14px 16px; }
+    .event-info-row {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; color: #555; margin-bottom: 6px;
+    }
+    .event-info-row svg { color: #888; flex-shrink: 0; }
+
+    .rsvp-wrap {
+      display: flex; gap: 8px; margin-top: 14px;
+    }
+    .rsvp-btn {
+      flex: 1; height: 44px; border-radius: 22px;
+      border: 1.5px solid #d0d0e0; background: #fff;
+      font-size: 14px; font-weight: 600; cursor: pointer;
+      font-family: inherit; transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 4px;
+    }
+    .rsvp-btn.yes.active { background: #2d2dcc; border-color: #2d2dcc; color: #fff; }
+    .rsvp-btn.no.active { background: #e03030; border-color: #e03030; color: #fff; }
+    .rsvp-btn.maybe.active { background: #888; border-color: #888; color: #fff; }
+
+    /* ---- Progress bar (集計) ---- */
+    .tally-section { margin-top: 12px; }
+    .tally-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .tally-label { font-size: 12px; color: #555; width: 40px; flex-shrink: 0; }
+    .tally-bar-bg { flex: 1; background: #f0f0f0; border-radius: 6px; height: 10px; }
+    .tally-bar { height: 10px; border-radius: 6px; }
+    .tally-count { font-size: 12px; color: #555; width: 28px; text-align: right; flex-shrink: 0; }
+
+    /* ---- Toban (当番) ---- */
+    .toban-card {
+      background: #fff; border-radius: 14px; padding: 16px; margin-bottom: 10px;
+    }
+    .toban-highlight {
+      background: #eef0fc; border-radius: 12px; padding: 14px;
+      margin-bottom: 12px; display: flex; align-items: center; gap: 12px;
+    }
+    .toban-icon { font-size: 28px; }
+    .toban-info .toban-date { font-size: 12px; color: #888; }
+    .toban-info .toban-name { font-size: 16px; font-weight: 700; color: #2d2dcc; }
+    .toban-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .toban-table th { background: #f4f4fc; padding: 6px 10px; text-align: left; color: #555; font-weight: 600; border-radius: 6px; }
+    .toban-table td { padding: 8px 10px; border-bottom: 0.5px solid #f0f0f0; color: #333; }
+    .toban-table tr:last-child td { border-bottom: none; }
+    .toban-me { font-weight: 700; color: #2d2dcc; }
+
+    /* ---- 総会・委任状 ---- */
+    .sokai-card { background: #fff; border-radius: 14px; overflow: hidden; margin-bottom: 10px; }
+    .sokai-banner { background: #1a1a8c; padding: 14px 16px; }
+    .sokai-label { font-size: 12px; color: rgba(255,255,255,0.7); }
+    .sokai-title { font-size: 16px; font-weight: 700; color: #fff; margin-top: 2px; }
+    .sokai-body { padding: 14px 16px; }
+
+    /* ---- Summary chips ---- */
+    .chip-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .chip {
+      padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .chip-yes { background: #e0f4e8; color: #1a7a3a; }
+    .chip-no { background: #fde8e8; color: #b00020; }
+    .chip-maybe { background: #fff0e0; color: #b35a00; }
+    .chip-pending { background: #f0f0f0; color: #666; }
+
+    /* ---- Notice list item (compact) ---- */
+    .notice-item {
+      background: #fff; border-radius: 14px; padding: 14px 16px; margin-bottom: 8px;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .notice-item:hover { background: #f8f8fc; }
+    .notice-item-top { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .notice-item-title { font-size: 14px; font-weight: 600; color: #111; flex: 1; }
+    .notice-unread-dot {
+      width: 8px; height: 8px; border-radius: 50%; background: #2d2dcc; flex-shrink: 0;
+    }
+    .notice-item-meta { font-size: 12px; color: #888; }
+
+    /* ---- Empty state ---- */
+    .empty { text-align: center; padding: 40px 20px; color: #aaa; font-size: 14px; }
+
+    /* ---- Floating button ---- */
+    .fab {
+      position: fixed;
+      bottom: 88px;
+      right: calc(50% - 390px/2 + 16px);
+      width: 52px; height: 52px; border-radius: 26px;
+      background: #2d2dcc; color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; box-shadow: 0 4px 16px rgba(45,45,204,0.35);
+      border: none; font-size: 24px;
+      z-index: 15;
+    }
+
+    /* ---- Modal overlay ---- */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.45); z-index: 30;
+      align-items: flex-end; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-sheet {
+      width: 390px; background: #fff;
+      border-radius: 20px 20px 0 0;
+      max-height: 85vh; overflow-y: auto;
+    }
+    .modal-handle {
+      width: 36px; height: 4px; background: #d0d0d0; border-radius: 2px;
+      margin: 10px auto 14px;
+    }
+    .modal-header {
+      padding: 0 16px 14px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 0.5px solid #e8e8f0;
+    }
+    .modal-title { font-size: 17px; font-weight: 700; color: #111; }
+    .modal-close { background: none; border: none; cursor: pointer; color: #666; font-size: 20px; line-height: 1; }
+    .modal-body { padding: 16px; }
+
+    /* ---- Info rows ---- */
+    .info-row {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 10px 0; border-bottom: 0.5px solid #f0f0f0; font-size: 13px;
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-label { color: #888; width: 90px; flex-shrink: 0; }
+    .info-value { color: #222; flex: 1; line-height: 1.6; }
+
+    /* ---- Form fields ---- */
+    .field-label { font-size: 13px; color: #555; margin-bottom: 6px; font-weight: 500; }
+    .field-input {
+      width: 100%; height: 44px; border: 1.5px solid #d0d0e0; border-radius: 10px;
+      padding: 0 14px; font-size: 15px; color: #333; outline: none;
+      font-family: inherit; background: #fff;
+    }
+    .field-input:focus { border-color: #2d2dcc; }
+    .field-textarea {
+      width: 100%; border: 1.5px solid #d0d0e0; border-radius: 10px;
+      padding: 10px 14px; font-size: 14px; color: #333; outline: none;
+      font-family: inherit; resize: none; line-height: 1.6; background: #fff;
+    }
+    .field-textarea:focus { border-color: #2d2dcc; }
+    .field-group { margin-bottom: 16px; }
+  </style>
+</head>
+<body>
+<div class="phone">
+
+  <!-- ===== SCREEN: お知らせ一覧 ===== -->
+  <div class="screen active" id="screen-notice">
+    <div class="header">
+      <div class="back-btn hidden"></div>
+      <div class="header-title">お知らせ</div>
+      <div class="header-action" onclick="openModal('modal-filter')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="4" y1="6" x2="20" y2="6"/><line x1="7" y1="12" x2="17" y2="12"/><line x1="10" y1="18" x2="14" y2="18"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="search-bar">
+      <input class="search-input" type="text" placeholder="キーワードで検索">
+      <button class="filter-btn" onclick="openModal('modal-filter')">絞込</button>
+    </div>
+
+    <div class="section">
+      <!-- 未読 -->
+      <div class="section-title">
+        <span>新着・未読 <span style="color:#2d2dcc">3</span></span>
+      </div>
+
+      <div class="notice-item" onclick="showNoticeDetail('notice1')">
+        <div class="notice-item-top">
+          <div class="notice-unread-dot"></div>
+          <div class="tags" style="margin:0">
+            <span class="tag tag-orange">防犯</span>
+          </div>
+          <div class="notice-item-title">不審者出没に関するお知らせ</div>
+        </div>
+        <div class="notice-item-meta">第3班 ｜ 配信：2024年11月28日 09:00</div>
+      </div>
+
+      <div class="notice-item" onclick="showNoticeDetail('notice2')">
+        <div class="notice-item-top">
+          <div class="notice-unread-dot"></div>
+          <div class="tags" style="margin:0">
+            <span class="tag tag-blue">行政</span>
+          </div>
+          <div class="notice-item-title">市道補修工事のお知らせ（桜木通り）</div>
+        </div>
+        <div class="notice-item-meta">全体配信 ｜ 配信：2024年11月27日 14:30</div>
+      </div>
+
+      <div class="notice-item" onclick="showNoticeDetail('notice3')">
+        <div class="notice-item-top">
+          <div class="notice-unread-dot"></div>
+          <div class="tags" style="margin:0">
+            <span class="tag tag-green">行事</span>
+          </div>
+          <div class="notice-item-title">令和6年度 冬季清掃活動のご案内</div>
+        </div>
+        <div class="notice-item-meta">全体配信 ｜ 配信：2024年11月25日 10:00</div>
+      </div>
+
+      <!-- 既読 -->
+      <div class="section-title">
+        <span style="color:#888">既読</span>
+        <span class="section-link" onclick="showScreen('screen-archive')">アーカイブ →</span>
+      </div>
+
+      <div class="notice-item" onclick="showNoticeDetail('notice4')">
+        <div class="notice-item-top">
+          <div style="width:8px"></div>
+          <div class="tags" style="margin:0">
+            <span class="tag tag-gray">その他</span>
+          </div>
+          <div class="notice-item-title" style="color:#888">年末ご挨拶と年始の活動予定</div>
+        </div>
+        <div class="notice-item-meta">全体配信 ｜ 配信：2024年11月20日 09:00 ✓ 確認済</div>
+      </div>
+
+      <div class="notice-item" onclick="showNoticeDetail('notice5')">
+        <div class="notice-item-top">
+          <div style="width:8px"></div>
+          <div class="tags" style="margin:0">
+            <span class="tag tag-green">行事</span>
+          </div>
+          <div class="notice-item-title" style="color:#888">防災訓練の結果報告</div>
+        </div>
+        <div class="notice-item-meta">全体配信 ｜ 配信：2024年11月15日 16:00 ✓ 確認済</div>
+      </div>
+    </div>
+  </div><!-- /screen-notice -->
+
+  <!-- ===== SCREEN: お知らせ詳細 ===== -->
+  <div class="screen" id="screen-notice-detail">
+    <div class="header">
+      <div class="back-btn" onclick="showScreen('screen-notice')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m15 18-6-6 6-6"/></svg>
+      </div>
+      <div class="header-title">お知らせ詳細</div>
+      <div class="header-space"></div>
+    </div>
+    <div class="section">
+      <div style="height:14px"></div>
+      <div class="card">
+        <div class="tags"><span class="tag tag-orange" id="detail-tag">防犯</span></div>
+        <div class="card-title" id="detail-title" style="font-size:17px;margin-bottom:8px">不審者出没に関するお知らせ</div>
+        <div class="card-meta" id="detail-meta">第3班 ｜ 2024年11月28日 09:00</div>
+        <div class="divider"></div>
+        <div class="notice-content" id="detail-body">
+          11月27日（水）午後3時頃、桜木2丁目付近において不審者の目撃情報がありました。
+          お子さんや高齢者の方は、なるべく一人での外出を避けるようお願いいたします。
+          不審者を見かけた際は、直ちに110番通報してください。
+
+          ■ 目撃情報
+          ・場所：桜木2丁目 公園付近
+          ・時刻：午後3時頃
+          ・人相：40代男性、グレーのジャンパー着用
+
+          引き続き地域の安全にご協力をお願いいたします。
+        </div>
+        <div id="detail-attach" style="display:none">
+          <div class="attach-row">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <span>防犯情報チラシ.pdf</span>
+            <span class="dl-btn">開く</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 既読ボタン -->
+      <button class="read-btn" id="read-confirm-btn" onclick="toggleRead()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        確認しました
+      </button>
+
+      <div style="height:12px"></div>
+
+      <!-- 役員向け：既読状況 -->
+      <div class="card" id="read-status-panel">
+        <div class="card-title" style="margin-bottom:12px">既読状況（役員確認）</div>
+        <div class="status-bar-wrap">
+          <div class="status-bar-label"><span>既読率</span><span>7 / 12世帯</span></div>
+          <div class="status-bar-bg"><div class="status-bar-fill" style="width:58%"></div></div>
+        </div>
+        <div class="divider"></div>
+        <div class="user-row">
+          <div class="user-avatar">田</div>
+          <div class="user-name">田中 一郎（1班長）</div>
+          <div class="user-status read">✓ 確認済</div>
+        </div>
+        <div class="user-row">
+          <div class="user-avatar">鈴</div>
+          <div class="user-name">鈴木 花子</div>
+          <div class="user-status read">✓ 確認済</div>
+        </div>
+        <div class="user-row">
+          <div class="user-avatar">佐</div>
+          <div class="user-name">佐藤 健太</div>
+          <div class="user-status unread">未読</div>
+        </div>
+        <div class="user-row">
+          <div class="user-avatar">山</div>
+          <div class="user-name">山田 幸子</div>
+          <div class="user-status unread">未読</div>
+        </div>
+        <div style="text-align:center;margin-top:10px">
+          <button class="btn-ghost">未読者に再通知する →</button>
+        </div>
+      </div>
+    </div>
+  </div><!-- /screen-notice-detail -->
+
+  <!-- ===== SCREEN: アーカイブ ===== -->
+  <div class="screen" id="screen-archive">
+    <div class="header">
+      <div class="back-btn" onclick="showScreen('screen-notice')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m15 18-6-6 6-6"/></svg>
+      </div>
+      <div class="header-title">記事アーカイブ</div>
+      <div class="header-space"></div>
+    </div>
+    <div class="search-bar">
+      <input class="search-input" type="text" placeholder="過去のお知らせを検索">
+      <button class="filter-btn">検索</button>
+    </div>
+    <div class="section">
+      <div class="section-title"><span>2024年11月</span></div>
+      <div class="notice-item" onclick="showNoticeDetail('notice1')">
+        <div class="notice-item-top">
+          <div style="width:8px"></div>
+          <div class="tags" style="margin:0"><span class="tag tag-orange">防犯</span></div>
+          <div class="notice-item-title" style="color:#888">不審者出没に関するお知らせ</div>
+        </div>
+        <div class="notice-item-meta">11月28日 ✓ 確認済</div>
+      </div>
+      <div class="notice-item">
+        <div class="notice-item-top">
+          <div style="width:8px"></div>
+          <div class="tags" style="margin:0"><span class="tag tag-gray">その他</span></div>
+          <div class="notice-item-title" style="color:#888">年末ご挨拶と年始の活動予定</div>
+        </div>
+        <div class="notice-item-meta">11月20日 ✓ 確認済</div>
+      </div>
+      <div class="notice-item">
+        <div class="notice-item-top">
+          <div style="width:8px"></div>
+          <div class="tags" style="margin:0"><span class="tag tag-green">行事</span></div>
+          <div class="notice-item-title" style="color:#888">防災訓練の結果報告</div>
+        </div>
+        <div class="notice-item-meta">11月15日 ✓ 確認済</div>
+      </div>
+      <div class="section-title"><span>2024年10月</span></div>
+      <div class="notice-item">
+        <div class="notice-item-top">
+          <div style="width:8px"></div>
+          <div class="tags" style="margin:0"><span class="tag tag-green">行事</span></div>
+          <div class="notice-item-title" style="color:#888">秋の防災訓練のご案内</div>
+        </div>
+        <div class="notice-item-meta">10月22日 ✓ 確認済</div>
+      </div>
+      <div class="notice-item">
+        <div class="notice-item-top">
+          <div style="width:8px"></div>
+          <div class="tags" style="margin:0"><span class="tag tag-blue">行政</span></div>
+          <div class="notice-item-title" style="color:#888">市政だより10月号の配布について</div>
+        </div>
+        <div class="notice-item-meta">10月10日 ✓ 確認済</div>
+      </div>
+    </div>
+  </div><!-- /screen-archive -->
+
+  <!-- ===== SCREEN: 回覧板 ===== -->
+  <div class="screen" id="screen-kairan">
+    <div class="header">
+      <div class="back-btn hidden"></div>
+      <div class="header-title">回覧板</div>
+      <div class="header-space"></div>
+    </div>
+    <div class="section">
+      <div style="height:10px"></div>
+
+      <!-- 自分の順番のアラート -->
+      <div style="background:#fff8e6;border:1.5px solid #f0b800;border-radius:14px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:flex-start;gap:10px">
+        <div style="font-size:22px">📢</div>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:#7a5500;margin-bottom:3px">あなたの順番です！</div>
+          <div style="font-size:13px;color:#7a5500">「令和6年度 自治会活動報告書」の回覧が届いています。内容をご確認の上、次の方へ転送してください。</div>
+          <div style="margin-top:10px;display:flex;gap:8px">
+            <button class="btn-primary sm" style="flex:1" onclick="openModal('modal-kairan-detail')">内容を確認する</button>
+            <button class="btn-outline sm" style="flex:1" onclick="openModal('modal-kairan-forward')">次の方へ転送</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title"><span>回覧中</span></div>
+
+      <div class="kairan-card" onclick="openModal('modal-kairan-detail')">
+        <div class="kairan-num">📋 2024-11</div>
+        <div class="kairan-title">令和6年度 自治会活動報告書</div>
+        <div class="kairan-meta">配布元：会長 田中 ｜ 開始：2024年11月25日</div>
+        <div class="tags">
+          <span class="tag tag-orange">あなたの番</span>
+          <span class="tag tag-gray">第3班</span>
+        </div>
+        <div class="route-list">
+          <div class="route-item">
+            <div class="route-dot done">✓</div>
+            <div class="route-name">1. 田中 一郎（班長）</div>
+            <div class="route-time">11/25 確認</div>
+          </div>
+          <div class="route-item">
+            <div class="route-dot done">✓</div>
+            <div class="route-name">2. 鈴木 花子</div>
+            <div class="route-time">11/26 確認</div>
+          </div>
+          <div class="route-item">
+            <div class="route-dot current">→</div>
+            <div class="route-name" style="font-weight:700;color:#2d2dcc">3. あなた（山本 太郎）</div>
+            <div class="route-time">未確認</div>
+          </div>
+          <div class="route-item">
+            <div class="route-dot waiting">4</div>
+            <div class="route-name" style="color:#aaa">4. 佐藤 健太</div>
+            <div class="route-time">—</div>
+          </div>
+          <div class="route-item">
+            <div class="route-dot waiting">5</div>
+            <div class="route-name" style="color:#aaa">5. 伊藤 優子</div>
+            <div class="route-time">—</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title"><span>完了済み</span></div>
+
+      <div class="kairan-card">
+        <div class="kairan-num">📋 2024-10</div>
+        <div class="kairan-title">令和6年度 防災マップ（改訂版）</div>
+        <div class="kairan-meta">配布元：副会長 鈴木 ｜ 完了：2024年11月10日</div>
+        <div class="tags"><span class="tag tag-green">完了</span><span class="tag tag-gray">全体</span></div>
+      </div>
+
+      <div class="kairan-card">
+        <div class="kairan-num">📋 2024-09</div>
+        <div class="kairan-title">市からの通達：ゴミ収集ルール改定のお知らせ</div>
+        <div class="kairan-meta">配布元：役員会 ｜ 完了：2024年10月28日</div>
+        <div class="tags"><span class="tag tag-green">完了</span><span class="tag tag-gray">全体</span></div>
+      </div>
+    </div>
+  </div><!-- /screen-kairan -->
+
+  <!-- ===== SCREEN: イベント一覧 ===== -->
+  <div class="screen" id="screen-event">
+    <div class="header">
+      <div class="back-btn hidden"></div>
+      <div class="header-title">イベント・行事</div>
+      <div class="header-space"></div>
+    </div>
+    <div class="section">
+      <div style="height:10px"></div>
+
+      <!-- 当番ハイライト -->
+      <div class="toban-highlight" style="margin-bottom:10px">
+        <div class="toban-icon">🗑️</div>
+        <div class="toban-info">
+          <div class="toban-date">今週のごみ当番</div>
+          <div class="toban-name">山本 太郎（あなた）｜12月2日（月）</div>
+        </div>
+      </div>
+
+      <div class="section-title"><span>今後の行事</span></div>
+
+      <!-- 総会カード -->
+      <div class="sokai-card" onclick="showScreen('screen-sokai')">
+        <div class="sokai-banner">
+          <div class="sokai-label">📌 回答期限：12月10日</div>
+          <div class="sokai-title">令和6年度 定期総会</div>
+        </div>
+        <div class="sokai-body">
+          <div style="font-size:13px;color:#555;margin-bottom:10px">2024年12月15日（日）13:00〜 ｜ 桜木集会所</div>
+          <div class="chip-row">
+            <div class="chip chip-yes">✔ 出席 24</div>
+            <div class="chip chip-no">✘ 欠席 8</div>
+            <div class="chip chip-maybe">→ 委任 6</div>
+            <div class="chip chip-pending">未回答 12</div>
+          </div>
+          <div style="margin-top:12px">
+            <button class="btn-primary sm" onclick="event.stopPropagation();showScreen('screen-sokai')">出欠・委任を回答する</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 一般イベント -->
+      <div class="event-card" onclick="showScreen('screen-event-detail')">
+        <div class="event-header">
+          <div class="event-date">2024年12月8日（日）</div>
+          <div class="event-name">冬季一斉清掃活動</div>
+        </div>
+        <div class="event-body">
+          <div class="event-info-row">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            09:00〜11:00
+          </div>
+          <div class="event-info-row">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            桜木公園・周辺道路
+          </div>
+          <div class="chip-row" style="margin-top:10px">
+            <div class="chip chip-yes">✔ 参加 18</div>
+            <div class="chip chip-no">✘ 不参加 4</div>
+            <div class="chip chip-pending">未回答 8</div>
+          </div>
+          <div class="rsvp-wrap">
+            <button class="rsvp-btn yes active" onclick="setRsvp(this,'yes',event)">✔ 参加</button>
+            <button class="rsvp-btn no" onclick="setRsvp(this,'no',event)">✘ 不参加</button>
+            <button class="rsvp-btn maybe" onclick="setRsvp(this,'maybe',event)">? 未定</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 当番表 -->
+      <div class="section-title"><span>ごみ当番 ローテーション</span></div>
+      <div class="toban-card">
+        <table class="toban-table">
+          <tr><th>日付</th><th>当番</th></tr>
+          <tr><td>12月2日（月）</td><td class="toban-me">山本 太郎（あなた）</td></tr>
+          <tr><td>12月9日（月）</td><td>田中 一郎</td></tr>
+          <tr><td>12月16日（月）</td><td>鈴木 花子</td></tr>
+          <tr><td>12月23日（月）</td><td>佐藤 健太</td></tr>
+          <tr><td>12月30日（月）</td><td>伊藤 優子</td></tr>
+        </table>
+      </div>
+    </div>
+  </div><!-- /screen-event -->
+
+  <!-- ===== SCREEN: イベント詳細 ===== -->
+  <div class="screen" id="screen-event-detail">
+    <div class="header">
+      <div class="back-btn" onclick="showScreen('screen-event')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m15 18-6-6 6-6"/></svg>
+      </div>
+      <div class="header-title">イベント詳細</div>
+      <div class="header-space"></div>
+    </div>
+    <div class="section">
+      <div style="height:14px"></div>
+      <div class="event-card" style="margin-bottom:10px">
+        <div class="event-header">
+          <div class="event-date">2024年12月8日（日）</div>
+          <div class="event-name">冬季一斉清掃活動</div>
+        </div>
+        <div class="event-body">
+          <div class="info-row"><span class="info-label">日時</span><span class="info-value">2024年12月8日（日）09:00〜11:00</span></div>
+          <div class="info-row"><span class="info-label">場所</span><span class="info-value">桜木公園・周辺道路（集合：桜木公園 正門前）</span></div>
+          <div class="info-row"><span class="info-label">持ち物</span><span class="info-value">軍手・ゴミ袋（袋は当日配布）</span></div>
+          <div class="info-row"><span class="info-label">主催</span><span class="info-value">桜木自治会 環境部会</span></div>
+          <div class="info-row"><span class="info-label">備考</span><span class="info-value">雨天中止。前日17時までに本アプリにてお知らせします。</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title" style="margin-bottom:12px">出欠回答</div>
+        <div class="rsvp-wrap" style="margin-bottom:12px">
+          <button class="rsvp-btn yes active" onclick="setRsvp(this,'yes',event)">✔ 参加</button>
+          <button class="rsvp-btn no" onclick="setRsvp(this,'no',event)">✘ 不参加</button>
+          <button class="rsvp-btn maybe" onclick="setRsvp(this,'maybe',event)">? 未定</button>
+        </div>
+        <div class="field-group">
+          <div class="field-label">コメント（任意）</div>
+          <textarea class="field-textarea" rows="3" placeholder="例：子供も連れて参加します">子供と一緒に参加予定です。</textarea>
+        </div>
+        <button class="btn-primary">回答を送信する</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title" style="margin-bottom:12px">参加状況（集計）</div>
+        <div class="tally-section">
+          <div class="tally-row">
+            <div class="tally-label" style="color:#1a7a3a">✔ 参加</div>
+            <div class="tally-bar-bg"><div class="tally-bar" style="width:60%;background:#2d2dcc"></div></div>
+            <div class="tally-count">18</div>
+          </div>
+          <div class="tally-row">
+            <div class="tally-label" style="color:#b00020">✘ 不参加</div>
+            <div class="tally-bar-bg"><div class="tally-bar" style="width:13%;background:#e03030"></div></div>
+            <div class="tally-count">4</div>
+          </div>
+          <div class="tally-row">
+            <div class="tally-label" style="color:#666">未回答</div>
+            <div class="tally-bar-bg"><div class="tally-bar" style="width:27%;background:#ccc"></div></div>
+            <div class="tally-count">8</div>
+          </div>
+        </div>
+        <div style="margin-top:12px;text-align:center">
+          <button class="btn-ghost">未回答者にリマインド送信 →</button>
+        </div>
+      </div>
+    </div>
+  </div><!-- /screen-event-detail -->
+
+  <!-- ===== SCREEN: 総会・委任状 ===== -->
+  <div class="screen" id="screen-sokai">
+    <div class="header">
+      <div class="back-btn" onclick="showScreen('screen-event')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m15 18-6-6 6-6"/></svg>
+      </div>
+      <div class="header-title">定期総会 出欠回答</div>
+      <div class="header-space"></div>
+    </div>
+    <div class="section">
+      <div style="height:14px"></div>
+      <div class="card" style="background:#1a1a8c;margin-bottom:10px">
+        <div style="font-size:16px;font-weight:700;color:#fff;margin-bottom:6px">令和6年度 定期総会</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.8)">2024年12月15日（日）13:00〜15:00</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.8)">桜木集会所 大会議室</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title" style="margin-bottom:4px">出欠・参加方法を選択</div>
+        <div style="font-size:12px;color:#888;margin-bottom:14px">回答期限：2024年12月10日（火）</div>
+
+        <div id="sokai-choices">
+          <div class="sokai-choice" id="choice-attend" onclick="selectSokai('attend')" style="border:1.5px solid #d0d0e0;border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer">
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="width:20px;height:20px;border-radius:50%;border:1.5px solid #d0d0e0;flex-shrink:0" id="radio-attend"></div>
+              <div>
+                <div style="font-size:14px;font-weight:700;color:#111">出席する</div>
+                <div style="font-size:12px;color:#888;margin-top:2px">会場に直接ご参加いただけます</div>
+              </div>
+            </div>
+          </div>
+          <div class="sokai-choice" id="choice-proxy" onclick="selectSokai('proxy')" style="border:1.5px solid #2d2dcc;background:#eef0fc;border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer">
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="width:20px;height:20px;border-radius:50%;border:2px solid #2d2dcc;background:#2d2dcc;flex-shrink:0;display:flex;align-items:center;justify-content:center" id="radio-proxy">
+                <div style="width:8px;height:8px;border-radius:50%;background:#fff"></div>
+              </div>
+              <div>
+                <div style="font-size:14px;font-weight:700;color:#2d2dcc">委任状を提出する</div>
+                <div style="font-size:12px;color:#555;margin-top:2px">議決権を他の方に委任します</div>
+              </div>
+            </div>
+          </div>
+          <div class="sokai-choice" id="choice-absent" onclick="selectSokai('absent')" style="border:1.5px solid #d0d0e0;border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer">
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="width:20px;height:20px;border-radius:50%;border:1.5px solid #d0d0e0;flex-shrink:0" id="radio-absent"></div>
+              <div>
+                <div style="font-size:14px;font-weight:700;color:#111">欠席する</div>
+                <div style="font-size:12px;color:#888;margin-top:2px">議案書は後日配布いたします</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 委任先（選択時に表示） -->
+        <div id="proxy-detail" style="background:#f4f4fc;border-radius:10px;padding:14px;margin-bottom:14px">
+          <div class="field-group" style="margin-bottom:12px">
+            <div class="field-label">委任先のお名前</div>
+            <select class="field-input" style="appearance:none;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E\");background-repeat:no-repeat;background-position:right 12px center">
+              <option>田中 一郎（会長）</option>
+              <option>鈴木 次郎（副会長）</option>
+            </select>
+          </div>
+          <div class="field-group" style="margin-bottom:0">
+            <div class="field-label">委任理由（任意）</div>
+            <textarea class="field-textarea" rows="2" placeholder="例：仕事のため出席できません">出張のため出席できないため、田中会長に委任いたします。</textarea>
+          </div>
+        </div>
+
+        <button class="btn-primary" onclick="openModal('modal-sokai-confirm')">回答を送信する</button>
+      </div>
+
+      <!-- 集計 -->
+      <div class="card">
+        <div class="card-title" style="margin-bottom:12px">回答集計（役員確認）</div>
+        <div class="tally-section">
+          <div class="tally-row">
+            <div class="tally-label" style="color:#1a7a3a">出席</div>
+            <div class="tally-bar-bg"><div class="tally-bar" style="width:48%;background:#2d2dcc"></div></div>
+            <div class="tally-count">24</div>
+          </div>
+          <div class="tally-row">
+            <div class="tally-label" style="color:#b00020">欠席</div>
+            <div class="tally-bar-bg"><div class="tally-bar" style="width:16%;background:#e03030"></div></div>
+            <div class="tally-count">8</div>
+          </div>
+          <div class="tally-row">
+            <div class="tally-label" style="color:#5a2db0">委任</div>
+            <div class="tally-bar-bg"><div class="tally-bar" style="width:12%;background:#8855cc"></div></div>
+            <div class="tally-count">6</div>
+          </div>
+          <div class="tally-row">
+            <div class="tally-label" style="color:#666">未回答</div>
+            <div class="tally-bar-bg"><div class="tally-bar" style="width:24%;background:#ccc"></div></div>
+            <div class="tally-count">12</div>
+          </div>
+        </div>
+        <div style="margin-top:12px;text-align:center">
+          <button class="btn-ghost">未回答者に督促通知を送る →</button>
+        </div>
+      </div>
+    </div>
+  </div><!-- /screen-sokai -->
+
+  <!-- ===== BOTTOM TABS ===== -->
+  <div class="bottom-tab">
+    <div class="tab-item active" id="tab-notice" onclick="switchTab('notice')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+      </svg>
+      お知らせ
+      <span class="tab-badge">3</span>
+    </div>
+    <div class="tab-item" id="tab-kairan" onclick="switchTab('kairan')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+      </svg>
+      回覧板
+      <span class="tab-badge" style="background:#e07000">1</span>
+    </div>
+    <div class="tab-item" id="tab-event" onclick="switchTab('event')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+      </svg>
+      イベント
+    </div>
+  </div>
+
+  <!-- ===== MODAL: フィルター ===== -->
+  <div class="modal-overlay" id="modal-filter" onclick="closeModal('modal-filter')">
+    <div class="modal-sheet" onclick="event.stopPropagation()">
+      <div class="modal-handle"></div>
+      <div class="modal-header">
+        <div class="modal-title">絞り込み</div>
+        <button class="modal-close" onclick="closeModal('modal-filter')">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="field-group">
+          <div class="field-label">カテゴリ</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+            <button class="tag tag-green" style="cursor:pointer;border:none">行事</button>
+            <button class="tag tag-orange" style="cursor:pointer;border:none">防犯</button>
+            <button class="tag tag-blue" style="cursor:pointer;border:none">行政</button>
+            <button class="tag tag-gray" style="cursor:pointer;border:none">その他</button>
+          </div>
+        </div>
+        <div class="field-group">
+          <div class="field-label">配信対象</div>
+          <select class="field-input">
+            <option>すべて</option><option>全体配信</option><option>第1班</option><option>第2班</option><option>第3班</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <div class="field-label">期間</div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input class="field-input" type="date" value="2024-11-01" style="flex:1">
+            <span style="color:#888">〜</span>
+            <input class="field-input" type="date" value="2024-11-30" style="flex:1">
+          </div>
+        </div>
+        <button class="btn-primary" onclick="closeModal('modal-filter')">この条件で絞り込む</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL: 回覧板詳細 ===== -->
+  <div class="modal-overlay" id="modal-kairan-detail" onclick="closeModal('modal-kairan-detail')">
+    <div class="modal-sheet" onclick="event.stopPropagation()">
+      <div class="modal-handle"></div>
+      <div class="modal-header">
+        <div class="modal-title">回覧内容の確認</div>
+        <button class="modal-close" onclick="closeModal('modal-kairan-detail')">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="tags" style="margin-bottom:10px"><span class="tag tag-gray">📋 2024-11</span></div>
+        <div style="font-size:16px;font-weight:700;color:#111;margin-bottom:4px">令和6年度 自治会活動報告書</div>
+        <div style="font-size:12px;color:#888;margin-bottom:14px">配布元：会長 田中 一郎</div>
+        <div class="notice-content">
+          令和6年度の各部会活動報告、会計中間報告、および12月総会の議題について記載されています。
+          添付PDFをご一読の上、内容をご確認ください。
+        </div>
+        <div class="attach-row">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <span>令和6年度_自治会活動報告書.pdf</span>
+          <span class="dl-btn">開く</span>
+        </div>
+        <div style="height:14px"></div>
+        <button class="btn-primary" onclick="closeModal('modal-kairan-detail');openModal('modal-kairan-forward')">確認しました　次の方へ転送する</button>
+        <div style="height:8px"></div>
+        <button class="btn-outline" onclick="closeModal('modal-kairan-detail')">後で確認する</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL: 回覧転送確認 ===== -->
+  <div class="modal-overlay" id="modal-kairan-forward" onclick="closeModal('modal-kairan-forward')">
+    <div class="modal-sheet" onclick="event.stopPropagation()">
+      <div class="modal-handle"></div>
+      <div class="modal-header">
+        <div class="modal-title">次の方へ転送</div>
+        <button class="modal-close" onclick="closeModal('modal-kairan-forward')">×</button>
+      </div>
+      <div class="modal-body">
+        <div style="text-align:center;padding:20px 0">
+          <div style="font-size:40px;margin-bottom:10px">📨</div>
+          <div style="font-size:16px;font-weight:700;color:#111;margin-bottom:6px">次の方に自動通知します</div>
+          <div style="font-size:14px;color:#555">4番目：佐藤 健太 さん</div>
+        </div>
+        <button class="btn-primary" onclick="closeModal('modal-kairan-forward');alert('転送通知を送りました！')">転送通知を送る</button>
+        <div style="height:8px"></div>
+        <button class="btn-outline" onclick="closeModal('modal-kairan-forward')">キャンセル</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL: 総会送信確認 ===== -->
+  <div class="modal-overlay" id="modal-sokai-confirm" onclick="closeModal('modal-sokai-confirm')">
+    <div class="modal-sheet" onclick="event.stopPropagation()">
+      <div class="modal-handle"></div>
+      <div class="modal-header">
+        <div class="modal-title">回答内容の確認</div>
+        <button class="modal-close" onclick="closeModal('modal-sokai-confirm')">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="info-row"><span class="info-label">総会名</span><span class="info-value">令和6年度 定期総会</span></div>
+        <div class="info-row"><span class="info-label">回答</span><span class="info-value" style="color:#2d2dcc;font-weight:700">委任状の提出</span></div>
+        <div class="info-row"><span class="info-label">委任先</span><span class="info-value">田中 一郎（会長）</span></div>
+        <div class="info-row"><span class="info-label">委任理由</span><span class="info-value">出張のため出席できないため、田中会長に委任いたします。</span></div>
+        <div style="height:16px"></div>
+        <button class="btn-primary" onclick="closeModal('modal-sokai-confirm');alert('回答を送信しました！')">この内容で送信する</button>
+        <div style="height:8px"></div>
+        <button class="btn-outline" onclick="closeModal('modal-sokai-confirm')">修正する</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /phone -->
+
+<script>
+  // ---- Screen navigation ----
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    // Sync tab highlight
+    const tabMap = {
+      'screen-notice': 'notice', 'screen-notice-detail': 'notice', 'screen-archive': 'notice',
+      'screen-kairan': 'kairan',
+      'screen-event': 'event', 'screen-event-detail': 'event', 'screen-sokai': 'event'
+    };
+    const tab = tabMap[id];
+    if (tab) {
+      document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+      document.getElementById('tab-' + tab).classList.add('active');
+    }
+    window.scrollTo(0, 0);
+  }
+
+  function switchTab(tab) {
+    const screenMap = { notice: 'screen-notice', kairan: 'screen-kairan', event: 'screen-event' };
+    showScreen(screenMap[tab]);
+  }
+
+  // ---- Notice detail data ----
+  const notices = {
+    notice1: { tag: '防犯', tagClass: 'tag-orange', title: '不審者出没に関するお知らせ', meta: '第3班 ｜ 2024年11月28日 09:00', body: '11月27日（水）午後3時頃、桜木2丁目付近において不審者の目撃情報がありました。\nお子さんや高齢者の方は、なるべく一人での外出を避けるようお願いいたします。\n不審者を見かけた際は、直ちに110番通報してください。\n\n■ 目撃情報\n・場所：桜木2丁目 公園付近\n・時刻：午後3時頃\n・人相：40代男性、グレーのジャンパー着用\n\n引き続き地域の安全にご協力をお願いいたします。', attach: true, read: false },
+    notice2: { tag: '行政', tagClass: 'tag-blue', title: '市道補修工事のお知らせ（桜木通り）', meta: '全体配信 ｜ 2024年11月27日 14:30', body: '桜木通り（桜木1丁目〜3丁目）において、路面補修工事を実施いたします。\n\n■ 工事期間\n2024年12月2日（月）〜 12月6日（金）\n\n■ 時間帯\n8:00〜17:00\n\n期間中、当該路線は片側交互通行となります。\nご通行の際はご注意ください。', attach: false, read: false },
+    notice3: { tag: '行事', tagClass: 'tag-green', title: '令和6年度 冬季清掃活動のご案内', meta: '全体配信 ｜ 2024年11月25日 10:00', body: '年末の清掃活動を下記のとおり実施いたします。地域の美化のため、多くの方のご参加をお願いいたします。\n\n■ 日時：2024年12月8日（日）09:00〜11:00\n■ 場所：桜木公園・周辺道路\n■ 持ち物：軍手・ゴミ袋（袋は当日配布）\n\n※ 雨天中止。当日07:00までにアプリ通知でお知らせします。', attach: false, read: false },
+    notice4: { tag: 'その他', tagClass: 'tag-gray', title: '年末ご挨拶と年始の活動予定', meta: '全体配信 ｜ 2024年11月20日 09:00', body: '今年も残すところわずかとなりました。会員の皆様には格別のご支援を賜り、心より感謝申し上げます。\n\n年始は1月10日（金）より通常活動を再開いたします。\n本年もよろしくお願いいたします。', attach: false, read: true },
+    notice5: { tag: '行事', tagClass: 'tag-green', title: '防災訓練の結果報告', meta: '全体配信 ｜ 2024年11月15日 16:00', body: '11月10日に実施した防災訓練には、73世帯中48世帯（約66%）にご参加いただきました。\n訓練の詳細な報告書は添付PDFをご覧ください。\n\n■ 参加者数：148名\n■ 実施内容：初期消火・避難・AED操作', attach: true, read: true }
+  };
+
+  function showNoticeDetail(id) {
+    const n = notices[id];
+    document.getElementById('detail-tag').textContent = n.tag;
+    document.getElementById('detail-tag').className = 'tag ' + n.tagClass;
+    document.getElementById('detail-title').textContent = n.title;
+    document.getElementById('detail-meta').textContent = n.meta;
+    document.getElementById('detail-body').textContent = n.body;
+    document.getElementById('detail-attach').style.display = n.attach ? 'block' : 'none';
+    const btn = document.getElementById('read-confirm-btn');
+    if (n.read) {
+      btn.textContent = '✓ 確認済み';
+      btn.classList.add('done');
+    } else {
+      btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> 確認しました';
+      btn.classList.remove('done');
+    }
+    showScreen('screen-notice-detail');
+  }
+
+  function toggleRead() {
+    const btn = document.getElementById('read-confirm-btn');
+    if (!btn.classList.contains('done')) {
+      btn.textContent = '✓ 確認済み';
+      btn.classList.add('done');
+    }
+  }
+
+  // ---- Modal ----
+  function openModal(id) {
+    document.getElementById(id).classList.add('open');
+  }
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('open');
+  }
+
+  // ---- RSVP ----
+  function setRsvp(btn, type, e) {
+    e.stopPropagation();
+    const wrap = btn.closest('.rsvp-wrap');
+    wrap.querySelectorAll('.rsvp-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  // ---- 総会選択 ----
+  function selectSokai(choice) {
+    ['attend','proxy','absent'].forEach(c => {
+      const el = document.getElementById('choice-' + c);
+      const radio = document.getElementById('radio-' + c);
+      if (c === choice) {
+        el.style.border = '1.5px solid #2d2dcc';
+        el.style.background = '#eef0fc';
+        radio.innerHTML = '<div style="width:8px;height:8px;border-radius:50%;background:#2d2dcc"></div>';
+        radio.style.border = '2px solid #2d2dcc';
+        radio.style.background = '#fff';
+      } else {
+        el.style.border = '1.5px solid #d0d0e0';
+        el.style.background = '#fff';
+        radio.innerHTML = '';
+        radio.style.border = '1.5px solid #d0d0e0';
+        radio.style.background = '#fff';
+      }
+    });
+    document.getElementById('proxy-detail').style.display = (choice === 'proxy') ? 'block' : 'none';
+  }
+
+  // Init
+  selectSokai('proxy');
+</script>
+</body>
+</html>
