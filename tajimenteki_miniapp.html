@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>多面的活動支援</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g:#2e7d32;--dg:#1b5e20;--lg:#4caf50;--pg:#e8f5e9;
+  --am:#ff8f00;--al:#fff8e1;
+  --bl:#1976d2;--rd:#c62828;
+  --w:#fff;--g1:#f5f5f5;--g2:#eee;--g3:#e0e0e0;
+  --g5:#9e9e9e;--g7:#616161;--g9:#212121;
+}
+html,body{
+  height:100%;overflow:hidden;
+  background:white;
+  font-family:'Hiragino Kaku Gothic ProN','Hiragino Sans','Meiryo',sans-serif;
+}
+body{display:flex;flex-direction:column}
+/* App header */
+.ahdr{height:54px;background:var(--g);display:flex;align-items:center;
+  padding:0 14px;justify-content:space-between;flex-shrink:0;
+  box-shadow:0 2px 6px rgba(0,0,0,0.2)}
+.ahdr .ttl{color:white;font-size:16px;font-weight:800}
+.ahdr .sub{color:rgba(255,255,255,0.75);font-size:10px;margin-top:1px}
+.role-btn{background:rgba(255,255,255,0.2);color:white;border:1px solid rgba(255,255,255,0.4);
+  padding:5px 12px;border-radius:14px;font-size:12px;font-weight:700;cursor:pointer;
+  font-family:inherit}
+/* Screens */
+.screen-wrap{flex:1;overflow:hidden;position:relative}
+.scr{position:absolute;top:0;left:0;right:0;bottom:0;display:none;flex-direction:column;overflow:hidden}
+.scr.on{display:flex}
+.scroll{flex:1;overflow-y:auto;padding:14px;-webkit-overflow-scrolling:touch}
+.scroll::-webkit-scrollbar{width:4px}
+.scroll::-webkit-scrollbar-thumb{background:var(--g3);border-radius:2px}
+/* Bottom nav */
+.bnav{height:66px;background:white;border-top:1px solid var(--g2);
+  display:flex;flex-shrink:0}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;cursor:pointer;gap:2px;border:none;background:none;padding:0}
+.ni .ico{font-size:22px;line-height:1}
+.ni .lbl{font-size:10px;color:var(--g5);font-weight:500}
+.ni.act .lbl{color:var(--g);font-weight:800}
+/* Login */
+.login{flex:1;background:linear-gradient(180deg,var(--dg) 0%,var(--g) 55%,var(--pg) 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px;gap:18px}
+.login-logo{font-size:64px;text-align:center}
+.login-title{color:white;font-size:20px;font-weight:800;text-align:center;line-height:1.4}
+.login-card{background:white;border-radius:20px;padding:22px;width:100%;max-width:360px;
+  box-shadow:0 8px 24px rgba(0,0,0,0.2)}
+.login-card h4{font-size:14px;font-weight:700;color:var(--g7);margin-bottom:14px;text-align:center}
+.mbtn{width:100%;padding:15px;background:var(--g);color:white;border:none;
+  border-radius:12px;font-size:15px;font-weight:800;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;margin-bottom:10px}
+.mbtn:hover{background:var(--dg)}
+.login-note{font-size:11px;color:var(--g5);text-align:center;line-height:1.6}
+/* Cards */
+.card{background:white;border-radius:14px;padding:14px;margin-bottom:10px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+.card-ttl{font-size:13px;font-weight:800;color:var(--g7);margin-bottom:10px;
+  display:flex;align-items:center;gap:6px}
+/* Points hero */
+.pt-hero{background:linear-gradient(135deg,var(--am),#f57f17);
+  border-radius:14px;padding:18px;color:white;text-align:center;margin-bottom:10px}
+.pt-hero .lbl{font-size:12px;opacity:.9;margin-bottom:2px}
+.pt-hero .amt{font-size:38px;font-weight:900;line-height:1}
+.pt-hero .note{font-size:11px;opacity:.8;margin-top:6px}
+/* Activity card */
+.act-card{border-left:4px solid var(--g);padding:11px 11px 11px 14px;
+  background:white;border-radius:0 12px 12px 0;margin-bottom:10px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.06)}
+.act-card.type-b{border-left-color:var(--bl)}
+.act-card.type-c{border-left-color:var(--am)}
+.act-date{font-size:11px;color:var(--g5);margin-bottom:3px}
+.act-name{font-size:14px;font-weight:800;color:var(--g9);margin-bottom:6px}
+.tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700}
+.tg{background:var(--pg);color:var(--dg)}
+.tb{background:#e3f2fd;color:var(--bl)}
+.ta{background:var(--al);color:var(--am)}
+.tgr{background:var(--g2);color:var(--g7)}
+/* RSVP */
+.rsvp-g{display:flex;gap:5px;margin-top:8px}
+.rsvp-b{flex:1;padding:8px 2px;border:2px solid var(--g3);border-radius:10px;
+  background:white;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;
+  color:var(--g7);font-family:inherit}
+.rsvp-b:hover{border-color:var(--g)}
+.rsvp-b.sy{background:var(--g);border-color:var(--g);color:white}
+.rsvp-b.sn{background:var(--rd);border-color:var(--rd);color:white}
+.rsvp-b.sm{background:var(--am);border-color:var(--am);color:white}
+/* Stats grid */
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.stat{background:white;border-radius:12px;padding:12px;text-align:center;
+  box-shadow:0 2px 6px rgba(0,0,0,0.06)}
+.stat .n{font-size:26px;font-weight:900;color:var(--g)}
+.stat .lbl{font-size:11px;color:var(--g5);margin-top:2px}
+/* History */
+.hist{display:flex;align-items:center;justify-content:space-between;
+  padding:11px 0;border-bottom:1px solid var(--g2)}
+.hist:last-child{border-bottom:none}
+.hist .hn{font-size:13px;font-weight:700;color:var(--g9)}
+.hist .hd{font-size:11px;color:var(--g5);margin-top:2px}
+.hist .hp{font-size:15px;font-weight:900;color:var(--am)}
+/* Approval */
+.appr{background:white;border-radius:12px;padding:12px;margin-bottom:8px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.06);border-left:4px solid var(--am)}
+.appr.done-ok{border-left-color:var(--g)}
+.appr.done-ng{border-left-color:var(--rd)}
+.appr .an{font-size:13px;font-weight:800;color:var(--g9)}
+.appr .ad{font-size:11px;color:var(--g5);margin:3px 0 8px}
+.appr-btns{display:flex;gap:6px}
+/* Form */
+.fg{margin-bottom:12px}
+.fl{font-size:12px;font-weight:700;color:var(--g7);margin-bottom:5px;display:block}
+.fi{width:100%;padding:10px 12px;border:1.5px solid var(--g3);border-radius:10px;
+  font-size:13px;font-family:inherit;outline:none;transition:border-color .2s}
+.fi:focus{border-color:var(--g)}
+.fta{width:100%;padding:10px 12px;border:1.5px solid var(--g3);border-radius:10px;
+  font-size:13px;font-family:inherit;outline:none;resize:none;min-height:72px}
+.fsel{width:100%;padding:10px 12px;border:1.5px solid var(--g3);border-radius:10px;
+  font-size:13px;font-family:inherit;outline:none;background:white}
+/* Buttons */
+.btn-p{width:100%;padding:13px;background:var(--g);color:white;border:none;
+  border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;margin-bottom:6px}
+.btn-s{width:100%;padding:11px;background:white;color:var(--g);border:2px solid var(--g);
+  border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
+.btn-sm{padding:6px 13px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;
+  border:none;font-family:inherit}
+.bappr{background:var(--g);color:white}
+.brej{background:var(--rd);color:white}
+/* Member */
+.member{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--g2)}
+.member:last-child{border-bottom:none}
+.mav{width:34px;height:34px;border-radius:50%;background:var(--pg);
+  display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.mn{font-size:13px;font-weight:700}
+.mr{font-size:11px;color:var(--g5)}
+/* Timer */
+.timer{text-align:center;font-size:46px;font-weight:900;color:var(--dg);
+  font-variant-numeric:tabular-nums;margin:14px 0;letter-spacing:2px}
+/* Photo area */
+.photo-area{border:2px dashed var(--g);border-radius:14px;padding:24px 14px;
+  text-align:center;cursor:pointer;background:var(--pg);margin-bottom:10px}
+.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:10px}
+.pt{aspect-ratio:1;border-radius:8px;background:var(--g2);overflow:hidden;position:relative}
+.pt img{width:100%;height:100%;object-fit:cover}
+/* QR mock */
+.qr-mock{width:160px;height:160px;background:var(--g1);border:2px dashed var(--g3);
+  border-radius:14px;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;margin:16px auto;cursor:pointer;gap:6px;transition:all .2s}
+.qr-mock:hover{background:var(--pg);border-color:var(--g)}
+.qr-grid{display:grid;grid-template-columns:repeat(7,16px);gap:2px}
+.qc{width:16px;height:16px;border-radius:2px}
+/* GPS */
+.gps{display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:10px;
+  font-size:12px;font-weight:700;margin-bottom:10px}
+.gps.acq{background:var(--al);color:var(--am)}
+.gps.ok{background:var(--pg);color:var(--dg)}
+/* Map stub */
+.map-stub{height:110px;background:linear-gradient(135deg,#c8e6c9,#a5d6a7);
+  border-radius:12px;display:flex;align-items:center;justify-content:center;
+  font-size:13px;color:var(--dg);font-weight:700;margin-bottom:10px;position:relative}
+/* Connection banners */
+.conn{display:flex;align-items:center;gap:10px;padding:12px;border-radius:12px;margin-bottom:8px;cursor:pointer}
+.conn.agr{background:var(--pg);border:1px solid var(--lg)}
+.conn.ns{background:#e3f2fd;border:1px solid #90caf9}
+.conn.lp{background:var(--al);border:1px solid #ffd54f}
+.conn-ico{font-size:26px;flex-shrink:0}
+.conn-ttl{font-size:13px;font-weight:800}
+.conn-desc{font-size:11px;color:var(--g5)}
+/* Report rows */
+.rrow{display:flex;justify-content:space-between;align-items:center;
+  padding:9px 0;border-bottom:1px solid var(--g2)}
+.rrow:last-child{border-bottom:none}
+.rl{font-size:12px;color:var(--g7)}
+.rv{font-size:13px;font-weight:800;color:var(--g9)}
+/* Attendance */
+.att-tbl{width:100%;border-collapse:collapse;font-size:12px}
+.att-tbl th{padding:7px 5px;text-align:left;color:var(--g5);font-weight:700;border-bottom:2px solid var(--g2)}
+.att-tbl td{padding:8px 5px;border-bottom:1px solid var(--g2);vertical-align:middle}
+.att{display:inline-block;padding:2px 7px;border-radius:6px;font-size:10px;font-weight:800}
+.att-y{background:var(--pg);color:var(--dg)}
+.att-n{background:#ffebee;color:var(--rd)}
+.att-m{background:var(--al);color:var(--am)}
+.att-0{background:var(--g2);color:var(--g5)}
+/* FAB — fixed for WebView */
+.fab{position:fixed;bottom:76px;right:16px;width:50px;height:50px;
+  background:var(--g);border:none;border-radius:50%;color:white;font-size:22px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 12px rgba(46,125,50,.4);z-index:10}
+/* Role switcher */
+.rs{display:flex;background:var(--g1);border-radius:12px;padding:3px;margin-bottom:14px}
+.ro{flex:1;padding:8px;text-align:center;border-radius:10px;font-size:12px;
+  font-weight:700;cursor:pointer;color:var(--g5);transition:all .2s;border:none;background:none;font-family:inherit}
+.ro.act{background:var(--g);color:white;box-shadow:0 2px 8px rgba(46,125,50,.35)}
+/* Progress */
+.prog{height:7px;background:var(--g2);border-radius:4px;overflow:hidden;margin-top:5px}
+.pf{height:100%;background:linear-gradient(90deg,var(--g),var(--lg));border-radius:4px;transition:width .5s}
+/* Modal — fixed for WebView */
+.modal-ov{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);
+  display:none;align-items:flex-end;z-index:100}
+.modal-ov.on{display:flex}
+.modal{background:white;border-radius:22px 22px 0 0;padding:22px;
+  width:100%;max-height:85%;overflow-y:auto}
+.modal-handle{width:40px;height:4px;background:var(--g3);border-radius:2px;margin:0 auto 18px}
+.modal-ttl{font-size:17px;font-weight:900;margin-bottom:18px}
+/* Notif */
+.notif{display:flex;gap:10px;padding:12px;background:var(--pg);border-radius:12px;margin-bottom:10px;align-items:flex-start}
+.ndot{width:8px;height:8px;background:var(--g);border-radius:50%;flex-shrink:0;margin-top:3px}
+.ntxt{font-size:12px;color:var(--g9);line-height:1.6}
+/* Toast */
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:rgba(27,94,32,.95);color:white;padding:10px 20px;border-radius:20px;
+  font-size:13px;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;z-index:9999}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+/* Section header */
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.st{font-size:14px;font-weight:800;color:var(--g9)}
+.sl{font-size:12px;color:var(--g);font-weight:700;cursor:pointer}
+/* Step indicator */
+.steps{display:flex;gap:4px;margin-bottom:14px}
+.step{flex:1;height:4px;border-radius:2px;background:var(--g2)}
+.step.done{background:var(--g)}
+</style>
+</head>
+<body>
+
+  <!-- LOGIN -->
+  <div class="login" id="loginScr">
+    <div class="login-logo">🌾</div>
+    <div class="login-title">多面的活動<br>支援ミニアプリ</div>
+    <div class="login-card">
+      <h4>みらいIDでログイン</h4>
+      <button class="mbtn" onclick="doLogin()">🔐 みらいIDでログイン</button>
+      <div class="login-note">OPTiM自治体公式スーパーアプリの<br>みらいID認証と連携してログインします</div>
+    </div>
+  </div>
+
+  <!-- MAIN APP -->
+  <div id="mainApp" style="display:none;flex:1;flex-direction:column;overflow:hidden;height:100%">
+
+    <div class="ahdr">
+      <div>
+        <div class="ttl">🌾 多面的活動支援</div>
+        <div class="sub" id="orgName">第2農地保全組合（郡上市）</div>
+      </div>
+      <button class="role-btn" id="roleBtn" onclick="showRoleModal()">参加者 ▼</button>
+    </div>
+
+    <!-- Notification bar -->
+    <div id="notifBar" style="background:#1b5e20;padding:8px 14px;display:flex;align-items:center;gap:8px;cursor:pointer" onclick="showToast('📣 活動記録が承認されました！ +300pt')">
+      <span style="font-size:14px">🔔</span>
+      <span style="color:white;font-size:12px;font-weight:700">明日の活動リマインダー｜7/12（日）水路清掃</span>
+    </div>
+
+    <div class="screen-wrap">
+
+      <!-- ======= PARTICIPANT SCREENS ======= -->
+
+      <!-- P: Home -->
+      <div class="scr" id="p-home">
+        <div class="scroll">
+          <div class="rs">
+            <button class="ro act" onclick="switchRole('participant')">👨‍🌾 参加者モード</button>
+            <button class="ro" onclick="switchRole('leader')">👑 代表者モード</button>
+          </div>
+          <div class="pt-hero">
+            <div class="lbl">現在のポイント残高</div>
+            <div class="amt"><span id="ptBalance">2,840</span> <span style="font-size:16px">pt</span></div>
+            <div class="note">今月の活動：4回 / 合計12時間</div>
+          </div>
+          <div class="notif">
+            <div class="ndot"></div>
+            <div class="ntxt">明日7/12（日）10:00〜 <strong>第3農地区 水路清掃</strong>があります。出欠回答をお願いします。</div>
+          </div>
+          <div class="sh"><div class="st">📅 直近の活動予定</div><div class="sl" onclick="goTab('p','p-sched')">すべて見る</div></div>
+          <div class="act-card">
+            <div class="act-date">2026/07/12（日）10:00〜</div>
+            <div class="act-name">第3農地区 水路清掃</div>
+            <div class="tags"><span class="tag tg">農地維持支払</span></div>
+            <div class="rsvp-g" data-id="1">
+              <button class="rsvp-b" onclick="rsvp(this,'y')">✅ 参加</button>
+              <button class="rsvp-b" onclick="rsvp(this,'n')">❌ 不参加</button>
+              <button class="rsvp-b" onclick="rsvp(this,'m')">❓ 未定</button>
+            </div>
+          </div>
+          <div class="act-card type-b">
+            <div class="act-date">2026/07/19（日）09:00〜</div>
+            <div class="act-name">南部農道 草刈り</div>
+            <div class="tags"><span class="tag tg">農地維持支払</span></div>
+            <div class="rsvp-g" data-id="2">
+              <button class="rsvp-b sy" onclick="rsvp(this,'y')">✅ 参加</button>
+              <button class="rsvp-b" onclick="rsvp(this,'n')">❌ 不参加</button>
+              <button class="rsvp-b" onclick="rsvp(this,'m')">❓ 未定</button>
+            </div>
+          </div>
+          <div class="sh" style="margin-top:4px"><div class="st">🎁 ポイント獲得履歴</div><div class="sl" onclick="goTab('p','p-pts')">すべて見る</div></div>
+          <div class="card">
+            <div class="hist"><div><div class="hn">水路清掃（6/28）</div><div class="hd">承認済 3時間</div></div><div class="hp">+300pt</div></div>
+            <div class="hist"><div><div class="hn">農道草刈り（6/14）</div><div class="hd">承認済 2時間</div></div><div class="hp">+200pt</div></div>
+            <div class="hist"><div><div class="hn">草刈り作業（5/31）</div><div class="hd">承認済 4時間</div></div><div class="hp">+400pt</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- P: Schedule -->
+      <div class="scr" id="p-sched">
+        <div class="scroll">
+          <div class="sh"><div class="st">📅 活動予定一覧</div></div>
+          <div style="font-size:11px;color:var(--g5);margin-bottom:10px">出欠を回答してください</div>
+
+          <div class="act-card">
+            <div class="act-date">2026/07/12（日）10:00〜12:00</div>
+            <div class="act-name">第3農地区 水路清掃</div>
+            <div class="tags">
+              <span class="tag tg">農地維持支払</span>
+              <span class="tag tgr">参加予定 12名</span>
+            </div>
+            <div style="font-size:11px;color:var(--g7);margin-bottom:6px">📍 集合：第3農地区 北入口</div>
+            <div class="map-stub">🗺️ 地図で確認する <span style="position:absolute;font-size:28px">📍</span></div>
+            <div class="rsvp-g" data-id="11">
+              <button class="rsvp-b" onclick="rsvp(this,'y')">✅ 参加</button>
+              <button class="rsvp-b" onclick="rsvp(this,'n')">❌ 不参加</button>
+              <button class="rsvp-b" onclick="rsvp(this,'m')">❓ 未定</button>
+            </div>
+          </div>
+
+          <div class="act-card type-b">
+            <div class="act-date">2026/07/19（日）09:00〜12:00</div>
+            <div class="act-name">南部農道 草刈り</div>
+            <div class="tags">
+              <span class="tag tg">農地維持支払</span>
+              <span class="tag tgr">参加予定 8名</span>
+            </div>
+            <div style="font-size:11px;color:var(--g7);margin-bottom:6px">📍 集合：南部農道 第1駐車場</div>
+            <div class="map-stub">🗺️ 地図で確認する <span style="position:absolute;font-size:28px">📍</span></div>
+            <div class="rsvp-g" data-id="12">
+              <button class="rsvp-b sy" onclick="rsvp(this,'y')">✅ 参加</button>
+              <button class="rsvp-b" onclick="rsvp(this,'n')">❌ 不参加</button>
+              <button class="rsvp-b" onclick="rsvp(this,'m')">❓ 未定</button>
+            </div>
+          </div>
+
+          <div class="act-card type-c">
+            <div class="act-date">2026/07/26（土）09:00〜11:00</div>
+            <div class="act-name">北部水路 点検・補修</div>
+            <div class="tags">
+              <span class="tag tb">資源向上（共同）</span>
+              <span class="tag tgr">参加予定 15名</span>
+            </div>
+            <div style="font-size:11px;color:var(--g7);margin-bottom:6px">📍 集合：北部用水路 管理棟</div>
+            <div class="rsvp-g" data-id="13">
+              <button class="rsvp-b" onclick="rsvp(this,'y')">✅ 参加</button>
+              <button class="rsvp-b" onclick="rsvp(this,'n')">❌ 不参加</button>
+              <button class="rsvp-b" onclick="rsvp(this,'m')">❓ 未定</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- P: Record -->
+      <div class="scr" id="p-rec">
+        <div class="scroll">
+          <div class="sh"><div class="st">📝 活動を記録する</div></div>
+          <div class="steps">
+            <div class="step done" id="s1"></div>
+            <div class="step" id="s2"></div>
+            <div class="step" id="s3"></div>
+            <div class="step" id="s4"></div>
+          </div>
+          <div style="font-size:11px;color:var(--g5);margin-bottom:12px" id="stepLabel">ステップ 1/4：活動を選択</div>
+
+          <!-- Step 1 -->
+          <div id="recStep1">
+            <div class="fg">
+              <label class="fl">対象活動を選択</label>
+              <select class="fsel" id="selAct">
+                <option value="">-- 活動を選択 --</option>
+                <option value="1">2026/07/12 水路清掃（農地維持支払）</option>
+                <option value="2">2026/07/19 農道草刈り（農地維持支払）</option>
+                <option value="3">2026/07/26 水路点検（資源向上共同）</option>
+              </select>
+            </div>
+            <div class="gps acq" id="gpsStatus">📡 GPS取得中...</div>
+            <button class="btn-p" onclick="nextStep(2)">次へ：チェックイン</button>
+          </div>
+
+          <!-- Step 2: QR -->
+          <div id="recStep2" style="display:none">
+            <div style="text-align:center">
+              <div style="font-size:13px;font-weight:700;color:var(--g9);margin-bottom:4px">QRチェックイン</div>
+              <div style="font-size:11px;color:var(--g5);margin-bottom:4px">QRコードをスキャンして出席登録</div>
+            </div>
+            <div class="qr-mock" onclick="doQrScan()" id="qrArea">
+              <div class="qr-grid" id="qrGrid"></div>
+              <div style="font-size:11px;color:var(--g5);margin-top:4px">タップしてスキャン</div>
+            </div>
+            <div id="qrResult" style="display:none;text-align:center;padding:10px;background:var(--pg);border-radius:10px;margin-bottom:10px">
+              <div style="font-size:18px">✅</div>
+              <div style="font-size:13px;font-weight:800;color:var(--dg)">チェックイン完了！</div>
+              <div style="font-size:11px;color:var(--g7)">山田 太郎さんの出席を記録しました</div>
+            </div>
+            <div style="display:flex;gap:6px">
+              <button class="btn-s" style="width:auto;flex:1" onclick="nextStep(1)">← 戻る</button>
+              <button class="btn-p" style="flex:2;margin:0" onclick="nextStep(3)" id="qrNextBtn">スキャンして次へ</button>
+            </div>
+          </div>
+
+          <!-- Step 3: Photo + Timer -->
+          <div id="recStep3" style="display:none">
+            <div class="fg">
+              <label class="fl">活動写真</label>
+              <div class="photo-area" onclick="document.getElementById('photoInput').click()">
+                <div style="font-size:28px">📷</div>
+                <div style="font-size:13px;font-weight:700;color:var(--dg);margin-top:6px">タップして写真を追加</div>
+                <div style="font-size:11px;color:var(--g5)">作業前後の状況を記録</div>
+                <input type="file" id="photoInput" accept="image/*" multiple style="display:none" onchange="addPhotos(event)">
+              </div>
+              <div class="photo-grid" id="photoGrid"></div>
+            </div>
+            <div class="fg">
+              <label class="fl">活動時間記録</label>
+              <div class="timer" id="timerDisp">00:00:00</div>
+              <button class="btn-p" id="timerBtn" onclick="toggleTimer()">▶ 開始</button>
+            </div>
+            <div class="fg">
+              <label class="fl">GPS位置情報</label>
+              <div class="gps ok">📍 35.4456°N, 136.9721°E（第3農地区付近）</div>
+            </div>
+            <div class="fg">
+              <label class="fl">作業メモ</label>
+              <textarea class="fta" placeholder="作業内容・特記事項を入力"></textarea>
+            </div>
+            <div style="display:flex;gap:6px">
+              <button class="btn-s" style="width:auto;flex:1" onclick="nextStep(2)">← 戻る</button>
+              <button class="btn-p" style="flex:2;margin:0" onclick="nextStep(4)">次へ：確認</button>
+            </div>
+          </div>
+
+          <!-- Step 4: Confirm -->
+          <div id="recStep4" style="display:none">
+            <div class="card">
+              <div class="card-ttl">✅ 送信内容確認</div>
+              <div class="rrow"><span class="rl">活動名</span><span class="rv" id="confAct">水路清掃</span></div>
+              <div class="rrow"><span class="rl">記録日時</span><span class="rv" id="confDate">2026/07/12 10:05</span></div>
+              <div class="rrow"><span class="rl">活動時間</span><span class="rv" id="confTime">-</span></div>
+              <div class="rrow"><span class="rl">写真</span><span class="rv" id="confPhoto">0枚</span></div>
+              <div class="rrow"><span class="rl">獲得予定ポイント</span><span class="rv" style="color:var(--am)" id="confPts">+100pt</span></div>
+            </div>
+            <div style="font-size:11px;color:var(--g5);margin-bottom:10px;text-align:center">送信後、代表者の承認でポイントが確定します</div>
+            <button class="btn-p" onclick="submitRecord()">📤 活動記録を送信する</button>
+            <button class="btn-s" onclick="nextStep(3)">← 戻って修正</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- P: Points -->
+      <div class="scr" id="p-pts">
+        <div class="scroll">
+          <div class="pt-hero">
+            <div class="lbl">ポイント残高</div>
+            <div class="amt"><span id="ptBalance2">2,840</span> <span style="font-size:16px">pt</span></div>
+            <div class="note">有効期限：2027年3月31日</div>
+          </div>
+          <div class="stats">
+            <div class="stat"><div class="n" id="totalActs">14</div><div class="lbl">今年度の活動回数</div></div>
+            <div class="stat"><div class="n">38h</div><div class="lbl">今年度の活動時間</div></div>
+          </div>
+          <div class="sh"><div class="st">📜 ポイント履歴</div></div>
+          <div class="card" id="histList">
+            <div class="hist"><div><div class="hn">水路清掃</div><div class="hd">2026/06/28 | 3時間</div></div><div class="hp">+300pt</div></div>
+            <div class="hist"><div><div class="hn">農道草刈り</div><div class="hd">2026/06/14 | 2時間</div></div><div class="hp">+200pt</div></div>
+            <div class="hist"><div><div class="hn">草刈り作業</div><div class="hd">2026/05/31 | 4時間</div></div><div class="hp">+400pt</div></div>
+            <div class="hist"><div><div class="hn">水路清掃</div><div class="hd">2026/05/17 | 3時間</div></div><div class="hp">+300pt</div></div>
+            <div class="hist"><div><div class="hn">農道整備</div><div class="hd">2026/04/26 | 2時間</div></div><div class="hp">+200pt</div></div>
+          </div>
+          <div class="sh"><div class="st">💱 ポイント交換</div></div>
+          <div class="card">
+            <div style="font-size:12px;color:var(--g7);margin-bottom:10px">ポイントを地域商品券・電子マネーに交換できます</div>
+            <div class="fg">
+              <label class="fl">交換先</label>
+              <select class="fsel"><option>郡上市商品券（1pt=1円）</option><option>電子マネー（1pt=1円）</option><option>農業資材クーポン</option></select>
+            </div>
+            <div class="fg">
+              <label class="fl">交換ポイント数</label>
+              <input class="fi" type="number" placeholder="100pt以上（100pt単位）" value="500">
+            </div>
+            <button class="btn-s" onclick="showToast('ポイント交換申請を受け付けました')">申請する</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- P: My Page -->
+      <div class="scr" id="p-myp">
+        <div class="scroll">
+          <div class="card">
+            <div class="card-ttl">🔐 みらいID連携</div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="width:44px;height:44px;border-radius:50%;background:var(--pg);display:flex;align-items:center;justify-content:center;font-size:22px">👨‍🌾</div>
+              <div>
+                <div style="font-size:14px;font-weight:800">山田 太郎</div>
+                <div style="font-size:11px;color:var(--g5)">みらいID：A-00234 | 農業者属性</div>
+                <div style="font-size:11px;color:var(--g)">✅ 連携済み</div>
+              </div>
+            </div>
+          </div>
+          <div class="sh"><div class="st">📋 個人活動実績</div></div>
+          <div class="card">
+            <div class="hist"><div><div class="hn">水路清掃</div><div class="hd">2026/06/28 | 3h | 写真3枚</div></div><div class="hp">+300pt</div></div>
+            <div class="hist"><div><div class="hn">農道草刈り</div><div class="hd">2026/06/14 | 2h | 写真2枚</div></div><div class="hp">+200pt</div></div>
+            <div class="hist"><div><div class="hn">草刈り作業</div><div class="hd">2026/05/31 | 4h | 写真1枚</div></div><div class="hp">+400pt</div></div>
+            <div class="hist"><div><div class="hn">水路清掃</div><div class="hd">2026/05/17 | 3h | 写真2枚</div></div><div class="hp">+300pt</div></div>
+          </div>
+          <div class="sh"><div class="st">📊 年間活動サマリー</div></div>
+          <div class="stats">
+            <div class="stat"><div class="n">14</div><div class="lbl">年間参加回数</div></div>
+            <div class="stat"><div class="n">38h</div><div class="lbl">年間活動時間</div></div>
+            <div class="stat"><div class="n" style="color:var(--am)">2,840</div><div class="lbl">獲得ポイント</div></div>
+            <div class="stat"><div class="n">95%</div><div class="lbl">参加率</div></div>
+          </div>
+          <div class="card" style="margin-bottom:10px">
+            <div style="font-size:12px;font-weight:700;color:var(--g7);margin-bottom:8px">月別活動参加状況</div>
+            <div style="display:flex;gap:4px;align-items:flex-end;height:60px">
+              <div style="flex:1;background:var(--g);border-radius:3px 3px 0 0;height:40%"></div>
+              <div style="flex:1;background:var(--g);border-radius:3px 3px 0 0;height:60%"></div>
+              <div style="flex:1;background:var(--g);border-radius:3px 3px 0 0;height:80%"></div>
+              <div style="flex:1;background:var(--g);border-radius:3px 3px 0 0;height:70%"></div>
+              <div style="flex:1;background:var(--lg);border-radius:3px 3px 0 0;height:30%;border:1px dashed var(--g)"></div>
+              <div style="flex:1;background:var(--g2);border-radius:3px 3px 0 0;height:20%"></div>
+            </div>
+            <div style="display:flex;gap:4px;margin-top:3px">
+              <div style="flex:1;font-size:9px;color:var(--g5);text-align:center">4月</div>
+              <div style="flex:1;font-size:9px;color:var(--g5);text-align:center">5月</div>
+              <div style="flex:1;font-size:9px;color:var(--g5);text-align:center">6月</div>
+              <div style="flex:1;font-size:9px;color:var(--g5);text-align:center">7月</div>
+              <div style="flex:1;font-size:9px;color:var(--g5);text-align:center">8月</div>
+              <div style="flex:1;font-size:9px;color:var(--g5);text-align:center">9月</div>
+            </div>
+          </div>
+          <div class="sh"><div class="st">🏘 所属組織</div></div>
+          <div class="card">
+            <div class="rrow"><span class="rl">組織名</span><span class="rv">第2農地保全組合</span></div>
+            <div class="rrow"><span class="rl">所在地</span><span class="rv">郡上市八幡町</span></div>
+            <div class="rrow"><span class="rl">代表者</span><span class="rv">鈴木 一郎</span></div>
+            <div class="rrow"><span class="rl">メンバー数</span><span class="rv">18名</span></div>
+            <div class="rrow"><span class="rl">対象農地</span><span class="rv">水田・農道 計18.4ha</span></div>
+          </div>
+          <div class="sh"><div class="st">🔗 連携サービス</div></div>
+          <div class="conn agr" onclick="showToast('アグリポンと連携中')">
+            <div class="conn-ico">🚁</div>
+            <div><div class="conn-ttl">アグリポン連携</div><div class="conn-desc">農薬・作業記録と一元管理</div></div>
+            <div style="margin-left:auto;color:var(--g5)">›</div>
+          </div>
+          <div class="conn ns" onclick="showToast('農政課との情報連携')">
+            <div class="conn-ico">🏛️</div>
+            <div><div class="conn-ttl">農政課との連携</div><div class="conn-desc">郡上市農林振興課と活動状況を共有</div></div>
+            <div style="margin-left:auto;color:var(--g5)">›</div>
+          </div>
+          <div class="conn lp" onclick="showToast('地域ポイントシステムと連携')">
+            <div class="conn-ico">💰</div>
+            <div><div class="conn-ttl">地域ポイント連携</div><div class="conn-desc">郡上市地域通貨「さくら」と連動</div></div>
+            <div style="margin-left:auto;color:var(--g5)">›</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ======= LEADER SCREENS ======= -->
+
+      <!-- L: Dashboard -->
+      <div class="scr" id="l-dash">
+        <div class="scroll">
+          <div class="rs">
+            <button class="ro" onclick="switchRole('participant')">👨‍🌾 参加者モード</button>
+            <button class="ro act" onclick="switchRole('leader')">👑 代表者モード</button>
+          </div>
+          <div class="card" style="background:linear-gradient(135deg,var(--dg),var(--g));color:white">
+            <div style="font-size:12px;opacity:.85;margin-bottom:4px">第2農地保全組合（代表者：鈴木 一郎）</div>
+            <div style="font-size:18px;font-weight:900;margin-bottom:2px">令和8年度 活動状況</div>
+            <div style="font-size:12px;opacity:.85">郡上市</div>
+          </div>
+          <div class="stats">
+            <div class="stat"><div class="n">42</div><div class="lbl">累計活動回数</div></div>
+            <div class="stat"><div class="n" style="color:var(--am)">3</div><div class="lbl">承認待ち件数</div></div>
+            <div class="stat"><div class="n">18</div><div class="lbl">メンバー数</div></div>
+            <div class="stat"><div class="n">94%</div><div class="lbl">平均参加率</div></div>
+          </div>
+          <div style="background:#fff3e0;border-radius:12px;padding:12px;margin-bottom:10px;cursor:pointer" onclick="goTab('l','l-appr')">
+            <div style="font-size:13px;font-weight:800;color:var(--am)">⚠️ 承認待ちが3件あります</div>
+            <div style="font-size:11px;color:var(--g7);margin-top:3px">タップして承認画面へ →</div>
+          </div>
+          <div class="sh"><div class="st">📅 直近の活動予定</div><div class="sl" onclick="goTab('l','l-acts')">管理する</div></div>
+          <div class="act-card">
+            <div class="act-date">2026/07/12（日）10:00〜</div>
+            <div class="act-name">第3農地区 水路清掃</div>
+            <div class="tags"><span class="tag tg">農地維持支払</span><span class="tag tgr">参加予定 12名</span></div>
+          </div>
+          <div class="act-card type-b">
+            <div class="act-date">2026/07/19（日）09:00〜</div>
+            <div class="act-name">南部農道 草刈り</div>
+            <div class="tags"><span class="tag tg">農地維持支払</span><span class="tag tgr">参加予定 8名</span></div>
+          </div>
+        </div>
+        <button class="fab" onclick="showAddModal()">＋</button>
+      </div>
+
+      <!-- L: Activities -->
+      <div class="scr" id="l-acts">
+        <div class="scroll">
+          <div class="sh"><div class="st">🗓 活動管理</div><div class="sl" onclick="showAddModal()">＋ 新規登録</div></div>
+          <div class="act-card" onclick="showAttModal()">
+            <div class="act-date">2026/07/12（日）10:00〜 <span style="color:var(--g);font-weight:700">▶ タップで出欠確認</span></div>
+            <div class="act-name">第3農地区 水路清掃</div>
+            <div class="tags"><span class="tag tg">農地維持支払</span></div>
+            <div style="display:flex;gap:8px;margin-top:6px;font-size:12px">
+              <span>✅ 参加：10名</span><span>❌ 不参加：2名</span><span>❓ 未定：6名</span>
+            </div>
+            <div class="prog"><div class="pf" style="width:55%"></div></div>
+          </div>
+          <div class="act-card type-b" onclick="showAttModal()">
+            <div class="act-date">2026/07/19（日）09:00〜 <span style="color:var(--g);font-weight:700">▶ タップで出欠確認</span></div>
+            <div class="act-name">南部農道 草刈り</div>
+            <div class="tags"><span class="tag tg">農地維持支払</span></div>
+            <div style="display:flex;gap:8px;margin-top:6px;font-size:12px">
+              <span>✅ 参加：6名</span><span>❌ 不参加：1名</span><span>❓ 未定：1名</span>
+            </div>
+            <div class="prog"><div class="pf" style="width:75%"></div></div>
+          </div>
+          <div class="act-card type-c">
+            <div class="act-date">2026/07/26（土）09:00〜</div>
+            <div class="act-name">北部水路 点検・補修</div>
+            <div class="tags"><span class="tag tb">資源向上（共同）</span></div>
+            <div style="display:flex;gap:8px;margin-top:6px;font-size:12px">
+              <span>✅ 参加：4名</span><span>❓ 未定：11名</span>
+            </div>
+            <div class="prog"><div class="pf" style="width:26%"></div></div>
+          </div>
+        </div>
+        <button class="fab" onclick="showAddModal()">＋</button>
+      </div>
+
+      <!-- L: Approval -->
+      <div class="scr" id="l-appr">
+        <div class="scroll">
+          <div class="sh"><div class="st">✅ 活動記録承認</div></div>
+          <div style="font-size:11px;color:var(--g5);margin-bottom:10px" id="pendCount">承認待ち：3件</div>
+
+          <div class="appr" id="appr1">
+            <div class="an">鈴木 一郎 / 農道草刈り</div>
+            <div class="ad">2026/07/05 | 2時間 | 写真2枚</div>
+            <div style="font-size:11px;color:var(--g7);background:var(--g1);padding:6px 8px;border-radius:6px;margin-bottom:8px">💬 「南部農道 全区間完了しました」</div>
+            <div class="appr-btns">
+              <button class="btn-sm bappr" onclick="doApprove('appr1')">✅ 承認</button>
+              <button class="btn-sm brej" onclick="doReject('appr1')">❌ 差戻し</button>
+              <button class="btn-sm" style="background:var(--al);color:var(--am)" onclick="showToast('写真2枚を確認')">📷 写真確認</button>
+            </div>
+          </div>
+
+          <div class="appr" id="appr2">
+            <div class="an">佐藤 花子 / 農道草刈り</div>
+            <div class="ad">2026/07/05 | 2時間 | 写真1枚</div>
+            <div style="font-size:11px;color:var(--g7);background:var(--g1);padding:6px 8px;border-radius:6px;margin-bottom:8px">💬 「（コメントなし）」</div>
+            <div class="appr-btns">
+              <button class="btn-sm bappr" onclick="doApprove('appr2')">✅ 承認</button>
+              <button class="btn-sm brej" onclick="doReject('appr2')">❌ 差戻し</button>
+              <button class="btn-sm" style="background:var(--al);color:var(--am)" onclick="showToast('写真1枚を確認')">📷 写真確認</button>
+            </div>
+          </div>
+
+          <div class="appr" id="appr3">
+            <div class="an">田中 健 / 水路清掃</div>
+            <div class="ad">2026/07/01 | 3時間 | 写真3枚</div>
+            <div style="font-size:11px;color:var(--g7);background:var(--g1);padding:6px 8px;border-radius:6px;margin-bottom:8px">💬 「泥上げ完了。一部修繕が必要な箇所あり」</div>
+            <div class="appr-btns">
+              <button class="btn-sm bappr" onclick="doApprove('appr3')">✅ 承認</button>
+              <button class="btn-sm brej" onclick="doReject('appr3')">❌ 差戻し</button>
+              <button class="btn-sm" style="background:var(--al);color:var(--am)" onclick="showToast('写真3枚を確認')">📷 写真確認</button>
+            </div>
+          </div>
+
+          <div id="allDone" style="display:none;text-align:center;padding:24px;background:var(--pg);border-radius:14px;margin-top:10px">
+            <div style="font-size:32px">🎉</div>
+            <div style="font-size:14px;font-weight:800;color:var(--dg);margin-top:8px">承認完了！</div>
+            <div style="font-size:12px;color:var(--g7);margin-top:4px">すべての活動記録を処理しました</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- L: Report -->
+      <div class="scr" id="l-rep">
+        <div class="scroll">
+          <div class="sh"><div class="st">📊 活動集計レポート</div></div>
+          <div class="card">
+            <div class="card-ttl">令和8年度 組織活動実績</div>
+            <div class="rrow"><span class="rl">累計活動回数</span><span class="rv">42回</span></div>
+            <div class="rrow"><span class="rl">累計活動時間</span><span class="rv">168時間</span></div>
+            <div class="rrow"><span class="rl">累計参加延べ人数</span><span class="rv">336人</span></div>
+            <div class="rrow"><span class="rl">農地維持支払 実施回数</span><span class="rv">28回</span></div>
+            <div class="rrow"><span class="rl">資源向上（共同）実施回数</span><span class="rv">14回</span></div>
+            <div class="rrow"><span class="rl">発行ポイント総数</span><span class="rv" style="color:var(--am)">42,000pt</span></div>
+          </div>
+          <div class="sh"><div class="st">📄 報告書出力</div></div>
+          <div class="card">
+            <div style="font-size:12px;color:var(--g7);margin-bottom:10px">農水省・市町村提出用フォーマットに自動変換</div>
+            <button class="btn-s" onclick="showToast('PDF出力を準備中...')">📄 PDF出力（農水省フォーマット）</button>
+            <button class="btn-s" style="margin-top:6px" onclick="showToast('Excelを出力中...')">📊 Excel出力（市町村提出用）</button>
+          </div>
+          <div class="sh"><div class="st">👥 メンバー管理</div></div>
+          <div class="card">
+            <div class="member">
+              <div class="mav">👨‍🌾</div>
+              <div><div class="mn">鈴木 一郎</div><div class="mr">代表者 | 参加18回</div></div>
+              <div style="margin-left:auto"><span class="tag tg">代表</span></div>
+            </div>
+            <div class="member">
+              <div class="mav">👨</div>
+              <div><div class="mn">山田 太郎</div><div class="mr">参加者 | 参加14回</div></div>
+              <div style="margin-left:auto"><button class="btn-sm" style="background:var(--g2);color:var(--g7)" onclick="showToast('メンバー情報を管理')">管理</button></div>
+            </div>
+            <div class="member">
+              <div class="mav">👩</div>
+              <div><div class="mn">佐藤 花子</div><div class="mr">参加者 | 参加11回</div></div>
+              <div style="margin-left:auto"><button class="btn-sm" style="background:var(--g2);color:var(--g7)" onclick="showToast('メンバー情報を管理')">管理</button></div>
+            </div>
+            <div class="member">
+              <div class="mav">👨‍🦲</div>
+              <div><div class="mn">田中 健</div><div class="mr">参加者 | 参加10回</div></div>
+              <div style="margin-left:auto"><button class="btn-sm" style="background:var(--g2);color:var(--g7)" onclick="showToast('メンバー情報を管理')">管理</button></div>
+            </div>
+          </div>
+          <div class="sh"><div class="st">🔗 連携</div></div>
+          <div class="conn agr" onclick="showToast('アグリポンと連携')">
+            <div class="conn-ico">🚁</div>
+            <div><div class="conn-ttl">アグリポン連携</div><div class="conn-desc">農薬・作業記録との一元管理</div></div>
+            <div style="margin-left:auto;color:var(--g5)">›</div>
+          </div>
+          <div class="conn ns" onclick="showToast('農政課との情報連携')">
+            <div class="conn-ico">🏛️</div>
+            <div><div class="conn-ttl">農政課との連携</div><div class="conn-desc">郡上市農林振興課に活動状況を提供</div></div>
+            <div style="margin-left:auto;color:var(--g5)">›</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /screen-wrap -->
+
+    <div class="bnav" id="bnav"></div>
+
+  </div><!-- /mainApp -->
+
+  <!-- Modals -->
+  <div class="modal-ov" id="roleModal">
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <div class="modal-ttl">モード切替</div>
+      <button class="btn-p" onclick="switchRole('participant');closeModal('roleModal')">👨‍🌾 参加者モードへ切替</button>
+      <button class="btn-s" onclick="switchRole('leader');closeModal('roleModal')" style="margin-top:6px">👑 代表者モードへ切替</button>
+    </div>
+  </div>
+
+  <div class="modal-ov" id="addModal">
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <div class="modal-ttl">活動を新規登録</div>
+      <div class="fg">
+        <label class="fl">活動名</label>
+        <input class="fi" type="text" id="newActName" placeholder="例：北部水路 草刈り">
+      </div>
+      <div class="fg">
+        <label class="fl">活動種別</label>
+        <select class="fsel" id="newActType">
+          <option>農地維持支払</option>
+          <option>資源向上支払（共同）</option>
+          <option>資源向上支払（長寿命化）</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label class="fl">活動日時</label>
+        <input class="fi" type="date" id="newActDate">
+      </div>
+      <div class="fg">
+        <label class="fl">集合場所</label>
+        <input class="fi" type="text" id="newActLoc" placeholder="例：北部用水路 管理棟前">
+      </div>
+      <div class="fg">
+        <label class="fl">担当者・メモ</label>
+        <textarea class="fta" placeholder="担当者・作業内容・注意事項など"></textarea>
+      </div>
+      <button class="btn-p" onclick="addActivity()">登録する</button>
+      <button class="btn-s" onclick="closeModal('addModal')" style="margin-top:6px">キャンセル</button>
+    </div>
+  </div>
+
+  <div class="modal-ov" id="attModal">
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <div class="modal-ttl">参加者出欠管理</div>
+      <div style="font-size:12px;color:var(--g7);margin-bottom:10px">第3農地区 水路清掃（2026/07/12）</div>
+      <table class="att-tbl">
+        <thead><tr><th>氏名</th><th>出欠</th><th>変更</th></tr></thead>
+        <tbody>
+          <tr><td>山田 太郎</td><td><span class="att att-y">参加</span></td><td><select class="fsel" style="padding:3px;font-size:11px" onchange="showToast('出欠を更新しました')"><option>参加</option><option>不参加</option><option>未定</option></select></td></tr>
+          <tr><td>鈴木 一郎</td><td><span class="att att-y">参加</span></td><td><select class="fsel" style="padding:3px;font-size:11px" onchange="showToast('出欠を更新しました')"><option>参加</option><option>不参加</option><option>未定</option></select></td></tr>
+          <tr><td>佐藤 花子</td><td><span class="att att-n">不参加</span></td><td><select class="fsel" style="padding:3px;font-size:11px" onchange="showToast('出欠を更新しました')"><option>参加</option><option selected>不参加</option><option>未定</option></select></td></tr>
+          <tr><td>田中 健</td><td><span class="att att-m">未定</span></td><td><select class="fsel" style="padding:3px;font-size:11px" onchange="showToast('出欠を更新しました')"><option>参加</option><option>不参加</option><option selected>未定</option></select></td></tr>
+          <tr><td>伊藤 幸子</td><td><span class="att att-0">未回答</span></td><td><select class="fsel" style="padding:3px;font-size:11px" onchange="showToast('出欠を更新しました')"><option>参加</option><option>不参加</option><option>未定</option></select></td></tr>
+        </tbody>
+      </table>
+      <button class="btn-p" style="margin-top:14px" onclick="closeModal('attModal')">閉じる</button>
+    </div>
+  </div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let role='participant',pts=2840,totalActs=14;
+let timerRunning=false,timerSec=0,timerInterval=null;
+let photoCnt=0,pendingAppr=3,recStep=1;
+
+function buildQR(){
+  const p=[1,1,1,0,1,1,1,1,0,0,0,0,0,1,1,0,1,0,0,1,1,1,1,1,0,1,0,1,1,1,0,0,0,1,1,1,1,0,1,0,0,1,1,1,1,1,0,1,1];
+  const g=document.getElementById('qrGrid');if(!g)return;
+  g.innerHTML='';
+  p.forEach(v=>{const c=document.createElement('div');c.className='qc';c.style.background=v?'#000':'#fff';g.appendChild(c)});
+}
+
+const pTabs=[{id:'p-home',ico:'🏠',lbl:'ホーム'},{id:'p-sched',ico:'📅',lbl:'活動予定'},{id:'p-rec',ico:'📝',lbl:'記録する'},{id:'p-pts',ico:'🎁',lbl:'ポイント'},{id:'p-myp',ico:'👤',lbl:'マイページ'}];
+const lTabs=[{id:'l-dash',ico:'📊',lbl:'概況'},{id:'l-acts',ico:'🗓',lbl:'活動管理'},{id:'l-appr',ico:'✅',lbl:'承認'},{id:'l-rep',ico:'📋',lbl:'レポート'}];
+
+function renderNav(tabs,activeId){
+  document.getElementById('bnav').innerHTML=tabs.map(t=>`<button class="ni${t.id===activeId?' act':''}" onclick="goTab('${role==='participant'?'p':'l'}','${t.id}')"><span class="ico">${t.ico}</span><span class="lbl">${t.lbl}</span></button>`).join('');
+}
+
+function goTab(r,id){
+  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  renderNav(r==='p'?pTabs:lTabs,id);
+}
+
+function doLogin(){
+  document.getElementById('loginScr').style.display='none';
+  const app=document.getElementById('mainApp');
+  app.style.display='flex';app.style.flexDirection='column';app.style.flex='1';
+  buildQR();
+  setTimeout(()=>{const g=document.getElementById('gpsStatus');if(g){g.className='gps ok';g.innerHTML='📍 35.4456°N, 136.9721°E 取得完了';}},2000);
+  switchRole('participant');
+}
+
+function switchRole(r){
+  role=r;
+  document.getElementById('roleBtn').textContent=r==='participant'?'参加者 ▼':'代表者 ▼';
+  if(r==='participant'){goTab('p','p-home');}else{goTab('l','l-dash');}
+}
+function showRoleModal(){showModal('roleModal');}
+
+function rsvp(btn,v){
+  btn.closest('.rsvp-g').querySelectorAll('.rsvp-b').forEach(b=>b.classList.remove('sy','sn','sm'));
+  if(v==='y')btn.classList.add('sy');
+  if(v==='n')btn.classList.add('sn');
+  if(v==='m')btn.classList.add('sm');
+  showToast({y:'参加登録しました ✅',n:'不参加を登録しました',m:'未定として登録しました'}[v]);
+}
+
+function nextStep(n){
+  if(n===2&&!document.getElementById('selAct').value){showToast('⚠️ 活動を選択してください');return;}
+  recStep=n;
+  ['recStep1','recStep2','recStep3','recStep4'].forEach((id,i)=>{document.getElementById(id).style.display=(i===n-1)?'block':'none';});
+  for(let i=1;i<=4;i++){const s=document.getElementById('s'+i);if(s)s.className='step'+(i<=n?' done':'');}
+  document.getElementById('stepLabel').textContent=['ステップ 1/4：活動を選択','ステップ 2/4：チェックイン','ステップ 3/4：活動を記録','ステップ 4/4：送信確認'][n-1]||'';
+  if(n===4)prepConfirm();
+}
+
+function prepConfirm(){
+  const idx=document.getElementById('selAct').value||1;
+  document.getElementById('confAct').textContent=['','水路清掃','農道草刈り','水路点検'][idx]||'水路清掃';
+  document.getElementById('confDate').textContent='2026/07/12 10:05';
+  const h=Math.floor(timerSec/3600),m=Math.floor((timerSec%3600)/60),s=timerSec%60;
+  document.getElementById('confTime').textContent=timerSec>0?`${h}h${m}m${s}s`:'未記録';
+  document.getElementById('confPhoto').textContent=photoCnt+'枚';
+  document.getElementById('confPts').textContent='+'+(Math.max(100,Math.floor(timerSec/3600)*100+100))+'pt';
+}
+
+function submitRecord(){
+  const ep=Math.max(100,Math.floor(timerSec/3600)*100+100);
+  pts+=ep;totalActs++;updatePts();
+  showToast('📤 活動記録を送信しました！ 承認後 +'+ep+'pt が付与されます');
+  timerSec=0;photoCnt=0;
+  clearInterval(timerInterval);timerRunning=false;
+  document.getElementById('timerDisp').textContent='00:00:00';
+  document.getElementById('timerBtn').textContent='▶ 開始';
+  document.getElementById('timerBtn').style.background='var(--g)';
+  document.getElementById('photoGrid').innerHTML='';
+  document.getElementById('qrResult').style.display='none';
+  document.getElementById('qrArea').style.display='flex';
+  nextStep(1);
+  setTimeout(()=>goTab('p','p-home'),1500);
+}
+
+function doQrScan(){
+  document.getElementById('qrArea').style.display='none';
+  document.getElementById('qrResult').style.display='block';
+  document.getElementById('qrNextBtn').textContent='次へ：活動を記録';
+  showToast('✅ チェックイン完了！出席を記録しました');
+}
+
+function addPhotos(e){
+  Array.from(e.target.files).forEach(f=>{
+    const r=new FileReader();
+    r.onload=ev=>{
+      const d=document.createElement('div');d.className='pt';
+      const img=document.createElement('img');img.src=ev.target.result;
+      d.appendChild(img);document.getElementById('photoGrid').appendChild(d);
+      photoCnt++;showToast('📷 写真を追加しました（'+photoCnt+'枚）');
+    };r.readAsDataURL(f);
+  });
+}
+
+function toggleTimer(){
+  if(!timerRunning){
+    timerRunning=true;
+    document.getElementById('timerBtn').textContent='⏹ 終了';
+    document.getElementById('timerBtn').style.background='var(--rd)';
+    timerInterval=setInterval(()=>{
+      timerSec++;
+      document.getElementById('timerDisp').textContent=
+        String(Math.floor(timerSec/3600)).padStart(2,'0')+':'+
+        String(Math.floor((timerSec%3600)/60)).padStart(2,'0')+':'+
+        String(timerSec%60).padStart(2,'0');
+    },1000);
+    showToast('▶ 活動時間の記録を開始しました');
+  }else{
+    clearInterval(timerInterval);timerRunning=false;
+    document.getElementById('timerBtn').textContent='▶ 再開始';
+    document.getElementById('timerBtn').style.background='var(--g)';
+    showToast('⏹ 活動時間を記録しました');
+  }
+}
+
+function updatePts(){
+  ['ptBalance','ptBalance2'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=pts.toLocaleString();});
+  const ta=document.getElementById('totalActs');if(ta)ta.textContent=totalActs;
+}
+
+function doApprove(id){
+  const el=document.getElementById(id);
+  const ad=el.querySelector('.ad').textContent;
+  el.classList.add('done-ok');
+  el.innerHTML='<div class="an" style="color:var(--g)">✅ 承認済み</div><div class="ad">'+ad+' | 承認完了</div>';
+  pendingAppr--;updatePendCount();pts+=200;updatePts();
+  showToast('✅ 承認しました！ポイントを付与しました（+200pt）');
+}
+
+function doReject(id){
+  const el=document.getElementById(id);
+  const an=el.querySelector('.an').textContent;
+  el.classList.add('done-ng');
+  el.innerHTML='<div class="an" style="color:var(--rd)">❌ 差戻し済み</div><div class="ad">'+an+'</div>';
+  pendingAppr--;updatePendCount();
+  showToast('❌ 差戻しました。再提出を依頼します');
+}
+
+function updatePendCount(){
+  const el=document.getElementById('pendCount');
+  if(el)el.textContent='承認待ち：'+pendingAppr+'件'+(pendingAppr===0?' ✅ すべて処理完了':'');
+  if(pendingAppr<=0){const d=document.getElementById('allDone');if(d)d.style.display='block';}
+}
+
+function addActivity(){
+  const name=document.getElementById('newActName').value;
+  if(!name){showToast('⚠️ 活動名を入力してください');return;}
+  closeModal('addModal');showToast('✅「'+name+'」を登録しました');
+}
+
+function showModal(id){document.getElementById(id).classList.add('on');}
+function closeModal(id){document.getElementById(id).classList.remove('on');}
+function showAddModal(){showModal('addModal');}
+function showAttModal(){showModal('attModal');}
+
+document.querySelectorAll('.modal-ov').forEach(ov=>{ov.addEventListener('click',e=>{if(e.target===ov)ov.classList.remove('on')});});
+
+let toastTimer;
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('on');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('on'),2500);
+}
+</script>
+</body>
+</html>
