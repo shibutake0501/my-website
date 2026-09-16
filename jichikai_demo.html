@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>自治会管理ミニアプリ デモ（自治体公式スーパーアプリ配色版）</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+  font-family:-apple-system,'Hiragino Sans','Meiryo',sans-serif;
+  background:linear-gradient(150deg,#00284f 0%,#004386 55%,#0070e0 100%);
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:24px 16px;
+  gap:14px;
+}
+
+.demo-header{
+  color:rgba(255,255,255,0.85);
+  text-align:center;
+}
+.demo-header h1{font-size:15px;color:#fff;font-weight:700;margin-bottom:3px}
+.demo-header p{font-size:11px;opacity:0.7;letter-spacing:0.3px}
+
+/* ── Phone ── */
+.phone{
+  width:375px;
+  height:760px;
+  background:#f5f7fa;
+  border-radius:38px;
+  border:8px solid #111;
+  box-shadow:0 30px 80px rgba(0,0,0,0.55),inset 0 0 0 2px #2a2a2a;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  position:relative;
+}
+.phone::before{
+  content:'';
+  position:absolute;
+  top:0;left:50%;transform:translateX(-50%);
+  width:110px;height:26px;
+  background:#111;border-radius:0 0 14px 14px;
+  z-index:90;
+}
+
+/* ── Status bar ── */
+.status-bar{
+  height:44px;
+  background:#00284f;
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  padding:4px 20px 6px;
+  color:#fff;
+  font-size:11px;font-weight:600;
+  flex-shrink:0;
+}
+
+/* ── App header ── */
+.app-header{
+  background:#004386;color:#fff;
+  padding:10px 14px 12px;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;
+}
+.app-title{font-size:16px;font-weight:800}
+.app-sub{font-size:10px;opacity:0.75;margin-top:1px}
+.hdr-actions{display:flex;gap:10px;align-items:center}
+.admin-toggle{
+  font-size:9px;background:rgba(255,255,255,0.15);
+  border:1px solid rgba(255,255,255,0.3);color:#fff;
+  border-radius:10px;padding:3px 8px;cursor:pointer;
+  transition:background .2s;white-space:nowrap;
+}
+.admin-toggle.on{background:rgba(255,167,36,0.3);border-color:rgba(255,167,36,0.6)}
+.icon-btn{
+  background:none;border:none;color:#fff;
+  font-size:20px;cursor:pointer;
+  width:30px;height:30px;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:50%;position:relative;
+  transition:background .2s;
+}
+.icon-btn:hover{background:rgba(255,255,255,0.15)}
+.badge{
+  position:absolute;top:0;right:0;
+  background:#d32f2f;color:#fff;
+  border-radius:8px;font-size:8px;font-weight:800;
+  padding:1px 4px;min-width:14px;text-align:center;
+}
+
+/* ── Content ── */
+.content{
+  flex:1;overflow-y:auto;position:relative;
+  scrollbar-width:thin;scrollbar-color:#b3d7f7 transparent;
+}
+.tab-panel{display:none;padding:12px;min-height:100%}
+.tab-panel.active{display:block}
+
+/* ── Bottom tab bar ── */
+.tab-bar{
+  background:#fff;border-top:1px solid #e8e8e8;
+  display:flex;flex-shrink:0;height:56px;
+}
+.tab-btn{
+  flex:1;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  cursor:pointer;background:none;border:none;
+  font-size:9.5px;color:#9e9e9e;gap:2px;
+  position:relative;transition:color .2s;
+}
+.tab-btn .ti{font-size:21px}
+.tab-btn.active{color:#0070e0}
+.tab-badge{
+  position:absolute;top:5px;right:calc(50% - 16px);
+  background:#d32f2f;color:#fff;
+  border-radius:8px;font-size:8px;font-weight:800;
+  padding:1px 5px;min-width:14px;text-align:center;
+}
+
+/* ── FAB ── */
+.fab{
+  position:absolute;bottom:68px;right:14px;
+  width:44px;height:44px;
+  background:#0070e0;color:#fff;
+  border-radius:50%;border:none;
+  font-size:24px;cursor:pointer;
+  box-shadow:0 4px 14px rgba(0,112,224,0.45);
+  display:none;align-items:center;justify-content:center;
+  z-index:20;transition:transform .2s;
+}
+.fab:hover{transform:scale(1.1)}
+.fab.visible{display:flex}
+
+/* ── Cards ── */
+.card{
+  background:#fff;border-radius:12px;
+  margin-bottom:8px;overflow:hidden;
+  box-shadow:0 1px 4px rgba(0,0,0,0.08);
+}
+
+/* ── Filter chips ── */
+.filter-row{
+  display:flex;gap:6px;overflow-x:auto;
+  padding-bottom:8px;margin-bottom:8px;
+  scrollbar-width:none;
+}
+.filter-row::-webkit-scrollbar{display:none}
+.chip{
+  white-space:nowrap;padding:4px 11px;
+  border-radius:20px;font-size:11px;font-weight:600;
+  cursor:pointer;border:1.5px solid #ddd;
+  background:#fff;color:#666;transition:all .2s;flex-shrink:0;
+}
+.chip.active{background:#0070e0;border-color:#0070e0;color:#fff}
+
+/* ── Notice list ── */
+.notice-item{
+  display:flex;gap:10px;padding:11px 12px;
+  cursor:pointer;transition:background .15s;
+  border-left:3px solid transparent;
+  position:relative;
+}
+.notice-item:hover{background:#f9f9f9}
+.notice-item.unread{border-left-color:#0070e0}
+.notice-item.urgent{border-left-color:#d32f2f;background:#fff5f5}
+.notice-item+.notice-item{border-top:1px solid #f0f0f0}
+.udot{
+  width:8px;height:8px;border-radius:50%;
+  margin-top:5px;flex-shrink:0;
+}
+.notice-item.unread .udot{background:#0070e0}
+.notice-item.urgent .udot{background:#d32f2f}
+.notice-item.read .udot{background:transparent}
+.nbody{flex:1;min-width:0}
+.nmeta{display:flex;align-items:center;gap:5px;margin-bottom:4px}
+.cat-badge{font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;color:#fff}
+.cat-行事{background:#0070e0}.cat-防犯{background:#004386}
+.cat-行政{background:#00897b}.cat-緊急{background:#d32f2f}
+.cat-その他{background:#3c464d}
+.ndate{font-size:10px;color:#bbb;margin-left:auto}
+.ntitle{
+  font-size:13px;font-weight:700;color:#1a1a1a;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  margin-bottom:2px;
+}
+.notice-item.read .ntitle{color:#757575;font-weight:500}
+.npreview{font-size:11px;color:#aaa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ── Section header ── */
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.sec-title{font-size:11px;font-weight:700;color:#0070e0;text-transform:uppercase;letter-spacing:0.5px}
+.sec-action{font-size:11px;color:#0070e0;cursor:pointer;display:none}
+.sec-action.visible{display:inline}
+
+/* ── Detail modal ── */
+.modal{
+  display:none;position:absolute;top:0;left:0;right:0;bottom:0;
+  background:#fff;z-index:50;flex-direction:column;
+}
+.modal.open{display:flex}
+.modal-hdr{
+  background:#004386;color:#fff;
+  padding:10px 14px;display:flex;
+  align-items:center;gap:8px;flex-shrink:0;
+}
+.back-btn{background:none;border:none;color:#fff;font-size:22px;cursor:pointer;line-height:1;padding:0}
+.modal-ttl{font-size:16px;font-weight:700}
+.modal-body{flex:1;overflow-y:auto;padding:16px}
+.detail-cat-row{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.detail-title{font-size:17px;font-weight:700;color:#1a1a1a;margin-bottom:5px;line-height:1.4}
+.detail-meta{font-size:10px;color:#9e9e9e;margin-bottom:14px}
+.detail-text{font-size:13px;color:#424242;line-height:1.8;white-space:pre-line}
+.confirm-bar{padding:12px 14px;border-top:1px solid #ebebeb;background:#fafafa;flex-shrink:0}
+.confirm-btn{
+  width:100%;padding:13px;background:#0070e0;color:#fff;
+  border:none;border-radius:12px;font-size:15px;font-weight:700;
+  cursor:pointer;transition:all .2s;
+}
+.confirm-btn.confirmed{background:#e6f2fd;color:#0070e0;border:1.5px solid #b3d7f7;cursor:default}
+
+/* ── 回覧板 ── */
+.circ-card{padding:14px}
+.circ-title{font-size:14px;font-weight:700;color:#1a1a1a;margin-bottom:4px}
+.circ-meta{font-size:10px;color:#9e9e9e;margin-bottom:12px}
+.chain-lbl{font-size:11px;font-weight:600;color:#666;margin-bottom:8px}
+.chain{display:flex;align-items:center;flex-wrap:nowrap;overflow-x:auto;padding-bottom:6px;gap:4px;scrollbar-width:none}
+.chain::-webkit-scrollbar{display:none}
+.chain-item{display:flex;flex-direction:column;align-items:center;flex-shrink:0;width:42px}
+.chain-arrow{color:#ccc;font-size:12px;flex-shrink:0;margin-top:-10px}
+.cavatar{
+  width:32px;height:32px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;color:#fff;margin-bottom:3px;
+}
+.cavatar.done{background:#0070e0}
+.cavatar.current{background:#e65100;box-shadow:0 0 0 3px rgba(230,81,0,0.25)}
+.cavatar.pending{background:#dcdcdc;color:#757575}
+.cname{font-size:8.5px;color:#666;text-align:center;line-height:1.2}
+.prog-wrap{margin:12px 0}
+.prog-lbl{display:flex;justify-content:space-between;font-size:10px;color:#666;margin-bottom:4px}
+.prog-bar{height:6px;background:#dcdcdc;border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;background:#0070e0;border-radius:3px;transition:width .6s ease}
+.circ-btn{
+  width:100%;padding:12px;background:#0070e0;color:#fff;
+  border:none;border-radius:10px;font-size:13.5px;font-weight:700;cursor:pointer;
+}
+.circ-btn:disabled{background:#e6f2fd;color:#0070e0;border:1.5px solid #b3d7f7;cursor:default}
+
+/* ── イベント ── */
+.ev-card{padding:14px}
+.ev-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.ev-title{font-size:14px;font-weight:700;color:#1a1a1a;flex:1}
+.ev-tag{font-size:9px;padding:2px 7px;border-radius:10px;font-weight:700;flex-shrink:0;margin-left:6px;margin-top:1px}
+.ev-tag.upcoming{background:#e6f2fd;color:#0070e0}
+.ev-tag.soon{background:#fff3e0;color:#e65100}
+.ev-info{font-size:11px;color:#666;margin-bottom:12px;display:flex;flex-direction:column;gap:3px}
+.ev-info span{display:flex;align-items:center;gap:4px}
+.rsvp-counts{display:flex;gap:7px;margin-bottom:12px}
+.rsvp-count{
+  flex:1;text-align:center;padding:8px 4px;
+  border-radius:8px;background:#f5f5f5;
+}
+.rsvp-count .num{font-size:20px;font-weight:800}
+.rsvp-count .lbl{font-size:9px;color:#666;margin-top:1px}
+.rsvp-count.rc-join .num{color:#0070e0}
+.rsvp-count.rc-absent .num{color:#d32f2f}
+.rsvp-count.rc-undecided .num{color:#e65100}
+.rsvp-btns{display:flex;gap:6px}
+.rsvp-btn{
+  flex:1;padding:9px 4px;border-radius:10px;
+  font-size:11.5px;font-weight:700;
+  border:2px solid;cursor:pointer;transition:all .2s;
+  background:#fff;
+}
+.rsvp-btn.r-join{border-color:#0070e0;color:#0070e0}
+.rsvp-btn.r-join.sel{background:#0070e0;color:#fff}
+.rsvp-btn.r-absent{border-color:#d32f2f;color:#d32f2f}
+.rsvp-btn.r-absent.sel{background:#d32f2f;color:#fff}
+.rsvp-btn.r-undecided{border-color:#e65100;color:#e65100}
+.rsvp-btn.r-undecided.sel{background:#e65100;color:#fff}
+.my-answer{font-size:10px;color:#0070e0;text-align:center;margin-top:8px;font-weight:600;min-height:14px}
+
+/* ── 当番 ── */
+.duty-item{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;background:#fff;
+  border-radius:10px;margin-bottom:6px;
+  box-shadow:0 1px 3px rgba(0,0,0,0.07);
+}
+.duty-item.today{background:#fff4e5;border:1.5px solid #ffcc80}
+.duty-day{font-size:12px;font-weight:700;width:38px;line-height:1.3;color:#1a1a1a}
+.duty-item.today .duty-day{color:#004386}
+.duty-day span{font-size:9px;font-weight:400;color:#888}
+.duty-type{font-size:11px;color:#666}
+.duty-person{font-size:12px;font-weight:600;margin-left:auto;color:#1a1a1a}
+.today-lbl{font-size:9px;background:#004386;color:#fff;padding:1px 5px;border-radius:5px;margin-left:4px}
+
+/* ── Form sheet (bottom sheet) ── */
+.form-overlay{
+  display:none;position:absolute;top:0;left:0;right:0;bottom:0;
+  background:rgba(0,0,0,0.45);z-index:60;
+  align-items:flex-end;
+}
+.form-overlay.open{display:flex}
+.form-sheet{
+  background:#fff;border-radius:20px 20px 0 0;
+  padding:18px 16px 20px;width:100%;max-height:78%;overflow-y:auto;
+}
+.form-sheet h3{font-size:15px;font-weight:700;margin-bottom:14px}
+.fg{margin-bottom:11px}
+.fg label{font-size:11px;font-weight:600;color:#666;display:block;margin-bottom:4px}
+.fg select,.fg input,.fg textarea{
+  width:100%;padding:9px 11px;
+  border:1.5px solid #e0e0e0;border-radius:10px;
+  font-size:13px;font-family:inherit;outline:none;
+}
+.fg textarea{height:72px;resize:none}
+.fg select:focus,.fg input:focus,.fg textarea:focus{border-color:#0070e0}
+.form-actions{display:flex;gap:8px;margin-top:14px}
+.btn-cancel{flex:1;padding:11px;border:1.5px solid #ddd;border-radius:10px;background:#fff;font-size:13px;cursor:pointer}
+.btn-submit{flex:2;padding:11px;background:#0070e0;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer}
+
+/* ── Toast ── */
+.toast{
+  position:absolute;bottom:66px;left:50%;transform:translateX(-50%);
+  background:rgba(20,20,20,0.88);color:#fff;
+  padding:8px 16px;border-radius:20px;
+  font-size:12px;white-space:nowrap;
+  z-index:200;opacity:0;pointer-events:none;
+  transition:opacity .3s;
+}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+
+<div class="demo-header">
+  <h1>🏘️ 自治会管理ミニアプリ　機能デモ</h1>
+  <p>カテゴリ① 掲示板・回覧板　／　カテゴリ② イベント・出欠管理</p>
+  <p style="margin-top:3px;opacity:0.55">配色：自治体公式スーパーアプリ準拠（Navy #004386 / Blue #0070E0 / Orange #FFA724）</p>
+</div>
+
+<div class="phone" id="phone">
+
+  <div class="status-bar">
+    <span>9:41</span><span>📶 🔋</span>
+  </div>
+
+  <div class="app-header">
+    <div>
+      <div class="app-title">🏘️ 自治会管理</div>
+      <div class="app-sub">○○自治会　第3班</div>
+    </div>
+    <div class="hdr-actions">
+      <button class="admin-toggle" id="adminToggle" onclick="toggleAdmin()">役員モード OFF</button>
+      <button class="icon-btn" onclick="showToast('通知センターを表示')">
+        🔔<span class="badge" id="notifBadge">3</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="content" id="mainContent">
+
+    <!-- ① 掲示板 -->
+    <div class="tab-panel active" id="panel-notice">
+      <div class="filter-row" id="filterRow">
+        <button class="chip active" onclick="filterNotices(this,'全て')">全て</button>
+        <button class="chip" onclick="filterNotices(this,'緊急')">🚨 緊急</button>
+        <button class="chip" onclick="filterNotices(this,'行事')">🎉 行事</button>
+        <button class="chip" onclick="filterNotices(this,'防犯')">🚔 防犯</button>
+        <button class="chip" onclick="filterNotices(this,'行政')">🏛 行政</button>
+        <button class="chip" onclick="filterNotices(this,'その他')">📋 その他</button>
+      </div>
+      <div class="card" id="noticeList"></div>
+      <div style="height:56px"></div><!-- FAB spacer -->
+    </div>
+
+    <!-- ② 回覧板 -->
+    <div class="tab-panel" id="panel-circular">
+      <div class="sec-hdr"><span class="sec-title">進行中</span></div>
+      <div class="card" style="margin-bottom:8px">
+        <div class="circ-card">
+          <div class="circ-title">📄 令和8年 定期総会　議事録</div>
+          <div class="circ-meta">配布日：2026/06/29　主体：自治会事務局</div>
+          <div class="chain-lbl">回覧状況（8世帯）</div>
+          <div class="chain" id="chain1"></div>
+          <div class="prog-wrap">
+            <div class="prog-lbl">
+              <span>確認済み</span>
+              <span id="chain1Prog">3 / 8 世帯</span>
+            </div>
+            <div class="prog-bar"><div class="prog-fill" id="chain1Fill" style="width:37.5%"></div></div>
+          </div>
+          <button class="circ-btn" id="circBtn1" onclick="confirmCircular()">📩 回覧を確認しました</button>
+        </div>
+      </div>
+      <div class="sec-hdr" style="margin-top:4px"><span class="sec-title">完了</span></div>
+      <div class="card">
+        <div class="circ-card" style="opacity:0.55">
+          <div class="circ-title">📄 自治会費改定についてのお知らせ</div>
+          <div class="circ-meta">配布日：2026/06/10　✅ 全世帯確認完了</div>
+          <div class="prog-bar"><div class="prog-fill" style="width:100%"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ③ イベント -->
+    <div class="tab-panel" id="panel-event">
+      <div class="sec-hdr">
+        <span class="sec-title">今後のイベント</span>
+        <span class="sec-action" id="addEvtBtn" onclick="showToast('イベント作成フォームを表示')">＋ 追加</span>
+      </div>
+      <div id="eventList"></div>
+    </div>
+
+    <!-- ④ 当番 -->
+    <div class="tab-panel" id="panel-duty">
+      <div class="sec-hdr"><span class="duty-week-title" style="font-size:13px;font-weight:700;color:#1a1a1a">📅 今週の当番（6/30〜7/6）</span></div>
+      <div id="dutyList"></div>
+      <div class="sec-hdr" style="margin-top:12px"><span class="sec-title">来週予定</span></div>
+      <div class="card">
+        <div style="padding:12px;font-size:12px;color:#888;text-align:center;line-height:1.6">
+          🗓️ 来週（7/7〜7/13）の当番表は<br>7月3日（木）に配信予定です
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+
+  <!-- FAB（役員モード時に表示） -->
+  <button class="fab" id="fab" onclick="openForm()">＋</button>
+
+  <!-- Tab bar -->
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('notice',this)">
+      <span class="ti">📋</span><span>掲示板</span>
+      <span class="tab-badge" id="noticeBadge">2</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('circular',this)">
+      <span class="ti">📮</span><span>回覧板</span>
+      <span class="tab-badge" id="circBadge">1</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('event',this)">
+      <span class="ti">🗓️</span><span>イベント</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('duty',this)">
+      <span class="ti">📝</span><span>当番</span>
+    </button>
+  </div>
+
+  <!-- Detail modal -->
+  <div class="modal" id="detailModal">
+    <div class="modal-hdr">
+      <button class="back-btn" onclick="closeModal()">‹</button>
+      <span class="modal-ttl">お知らせ詳細</span>
+    </div>
+    <div class="modal-body">
+      <div class="detail-cat-row">
+        <span class="cat-badge" id="dCat"></span>
+      </div>
+      <div class="detail-title" id="dTitle"></div>
+      <div class="detail-meta" id="dMeta"></div>
+      <div class="detail-text" id="dText"></div>
+    </div>
+    <div class="confirm-bar">
+      <button class="confirm-btn" id="confirmBtn" onclick="markRead()">✓ 確認しました</button>
+    </div>
+  </div>
+
+  <!-- Form sheet -->
+  <div class="form-overlay" id="formOverlay" onclick="outsideForm(event)">
+    <div class="form-sheet">
+      <h3>📝 お知らせを投稿</h3>
+      <div class="fg">
+        <label>カテゴリ</label>
+        <select><option>行事</option><option>防犯</option><option>行政</option><option>緊急</option><option>その他</option></select>
+      </div>
+      <div class="fg">
+        <label>タイトル</label>
+        <input type="text" placeholder="例：夏祭りのご案内">
+      </div>
+      <div class="fg">
+        <label>本文</label>
+        <textarea placeholder="お知らせの内容を入力してください…"></textarea>
+      </div>
+      <div class="fg">
+        <label>通知対象</label>
+        <select><option>全世帯</option><option>第1班</option><option>第2班</option><option>第3班（自班）</option><option>役員のみ</option></select>
+      </div>
+      <div class="form-actions">
+        <button class="btn-cancel" onclick="closeForm()">キャンセル</button>
+        <button class="btn-submit" onclick="submitNotice()">🔔 投稿する</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+</div><!-- /phone -->
+
+<script>
+/* ─── Data ─────────────────────────────────────────────── */
+const notices = [
+  { id:1, category:'緊急', urgent:true, read:false,
+    title:'台風5号接近に伴う避難準備情報',
+    preview:'気象庁より台風5号の接近が確認されました。',
+    date:'6/30',
+    body:'気象庁より台風5号の接近が確認されました。現在、○○市には避難準備・高齢者等避難開始が発令されています。\n\n【避難場所】\n・第一次：中央公民館（雨宿り可）\n・第二次：○○小学校体育館\n\n高齢者・障害者の方は早めの避難をお願いします。\n最新情報はスーパーアプリ「防災」タブでご確認ください。'},
+  { id:2, category:'行事', urgent:false, read:false,
+    title:'第42回 夏祭り 準備ボランティア募集',
+    preview:'7月15日（土）開催の夏祭りで設営を手伝っていただける方を募集しています。',
+    date:'6/28',
+    body:'7月15日（土）開催の「第42回 ○○自治会 夏祭り」で、設営・運営・片付けを手伝っていただけるボランティアを募集しています。\n\n【日時】7月15日（土）13:00〜21:30\n【場所】中央公民館前広場\n【内容】テント設営、出店補助、ゴミ分別・片付け\n\n参加可能な方は「イベント」タブより出欠登録をお願いします。'},
+  { id:3, category:'行政', urgent:false, read:true,
+    title:'令和8年度 固定資産税 第2期納付のご案内',
+    preview:'納付期限は7月31日（水）です。口座振替の方は残高をご確認ください。',
+    date:'6/25',
+    body:'令和8年度 固定資産税・都市計画税 第2期分の納付期限は7月31日（水）です。\n\n【納付方法】\n・コンビニエンスストア\n・金融機関窓口\n・口座振替（残高確認をお願いします）\n・スマートフォン決済\n\n納税通知書をなくされた方は○○市役所 税務課までご連絡ください。'},
+  { id:4, category:'防犯', urgent:false, read:true,
+    title:'不審者目撃情報（6/20 夕方）',
+    preview:'6/20 夕方、東地区付近で不審な声かけが報告されています。',
+    date:'6/20',
+    body:'6月20日（金）夕方17:30頃、東地区○丁目付近において、見知らぬ男性が小学生に声をかける事案が発生しました。\n\n【特徴】30〜40代男性、黒いジャケット着用、自転車に乗っていた\n\n不審者を見かけた場合は警察（110番）または班長までご連絡ください。'},
+  { id:5, category:'その他', urgent:false, read:true,
+    title:'粗大ごみ回収日のお知らせ（7月分）',
+    preview:'7月の粗大ごみ収集日は7月8日（火）です。前日20時以降に指定場所へ。',
+    date:'6/18',
+    body:'7月分の粗大ごみ収集日は下記のとおりです。\n\n【収集日】7月8日（火）\n【申込締切】7月4日（金）\n【申込先】○○市環境センター\n\n※事前申込が必要です。当日の飛込みは収集できません。'},
+];
+
+const chainData = [
+  {name:'事務局',state:'done'}, {name:'1組',state:'done'},
+  {name:'2組',state:'done'}, {name:'3組\n（私）',state:'current'},
+  {name:'4組',state:'pending'}, {name:'5組',state:'pending'},
+  {name:'6組',state:'pending'}, {name:'7組',state:'pending'},
+];
+
+const events = [
+  { id:1, title:'第42回 夏祭り', date:'7月15日（土）', time:'17:00〜21:30',
+    location:'中央公民館前広場', attending:45, absent:5, undecided:12, myRsvp:null, tag:'upcoming' },
+  { id:2, title:'草刈り作業（東側農道）', date:'7月6日（日）', time:'7:00〜10:00',
+    location:'東側農道沿い　集合：農協前', attending:18, absent:3, undecided:7, myRsvp:'参加', tag:'soon' },
+  { id:3, title:'防犯パトロール', date:'7月20日（日）', time:'19:00〜20:00',
+    location:'各地区周回（班長リード）', attending:0, absent:0, undecided:0, myRsvp:null, tag:'upcoming' },
+];
+
+const duties = [
+  { day:'月', date:'6/30', type:'ごみ当番', person:'田中 一郎', today:true },
+  { day:'火', date:'7/1',  type:'ごみ当番', person:'山田 花子', today:false },
+  { day:'水', date:'7/2',  type:'ごみ当番', person:'鈴木 次郎', today:false },
+  { day:'木', date:'7/3',  type:'ごみ当番', person:'佐藤 三郎', today:false },
+  { day:'金', date:'7/4',  type:'ごみ当番', person:'伊藤 四郎', today:false },
+  { day:'土', date:'7/5',  type:'見守り',   person:'渡辺 五郎', today:false },
+  { day:'日', date:'7/6',  type:'見守り',   person:'田中 一郎', today:false },
+];
+
+/* ─── State ─────────────────────────────────────────────── */
+let currentFilter='全て', currentNoticeId=null, isAdmin=false, circDone=false;
+
+/* ─── Init ───────────────────────────────────────────────── */
+(function init(){
+  renderNotices();
+  renderChain();
+  renderEvents();
+  renderDuties();
+  updateBadges();
+})();
+
+/* ─── Tabs ───────────────────────────────────────────────── */
+function switchTab(name, btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  btn.classList.add('active');
+}
+
+/* ─── Notices ────────────────────────────────────────────── */
+function renderNotices(f){
+  f=f||currentFilter;
+  const filtered=notices.filter(n=>f==='全て'||n.category===f);
+  document.getElementById('noticeList').innerHTML=filtered.map(n=>`
+    <div class="notice-item ${n.urgent?'urgent':n.read?'read':'unread'}" onclick="openNotice(${n.id})">
+      <div class="udot"></div>
+      <div class="nbody">
+        <div class="nmeta">
+          <span class="cat-badge cat-${n.category}">${n.category}</span>
+          <span class="ndate">${n.date}</span>
+        </div>
+        <div class="ntitle">${n.title}</div>
+        <div class="npreview">${n.preview}</div>
+      </div>
+    </div>`).join('');
+}
+
+function filterNotices(el,cat){
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  currentFilter=cat;
+  renderNotices(cat);
+}
+
+function openNotice(id){
+  currentNoticeId=id;
+  const n=notices.find(x=>x.id===id);
+  const dc=document.getElementById('dCat');
+  dc.textContent=n.category;
+  dc.className='cat-badge cat-'+n.category;
+  document.getElementById('dTitle').textContent=n.title;
+  document.getElementById('dMeta').textContent='投稿日：'+n.date+'　　投稿者：自治会事務局';
+  document.getElementById('dText').textContent=n.body;
+  const btn=document.getElementById('confirmBtn');
+  if(n.read){
+    btn.textContent='✅ 確認済み';
+    btn.className='confirm-btn confirmed';
+    btn.disabled=true;
+  } else {
+    btn.textContent='✓ 確認しました';
+    btn.className='confirm-btn';
+    btn.disabled=false;
+  }
+  document.getElementById('detailModal').classList.add('open');
+  document.getElementById('mainContent').style.overflow='hidden';
+}
+
+function markRead(){
+  const n=notices.find(x=>x.id===currentNoticeId);
+  if(!n||n.read) return;
+  n.read=true;
+  const btn=document.getElementById('confirmBtn');
+  btn.textContent='✅ 確認済み';
+  btn.className='confirm-btn confirmed';
+  btn.disabled=true;
+  renderNotices();
+  updateBadges();
+  showToast('✅ 確認しました');
+}
+
+function closeModal(){
+  document.getElementById('detailModal').classList.remove('open');
+  document.getElementById('mainContent').style.overflow='';
+}
+
+/* ─── Circular ───────────────────────────────────────────── */
+function renderChain(){
+  const done=chainData.filter(x=>x.state==='done').length;
+  const total=chainData.length;
+  const html=chainData.map((item,i)=>{
+    const arrow=i>0?'<div class="chain-arrow">›</div>':'';
+    return `${arrow}<div class="chain-item">
+      <div class="cavatar ${item.state}">${item.state==='done'?'✓':item.state==='current'?'★':'○'}</div>
+      <div class="cname">${item.name}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('chain1').innerHTML=html;
+  document.getElementById('chain1Prog').textContent=`${done} / ${total} 世帯`;
+  document.getElementById('chain1Fill').style.width=`${(done/total)*100}%`;
+}
+
+function confirmCircular(){
+  if(circDone) return;
+  circDone=true;
+  const cur=chainData.findIndex(x=>x.state==='current');
+  if(cur>=0){
+    chainData[cur].state='done';
+    if(cur+1<chainData.length) chainData[cur+1].state='current';
+  }
+  renderChain();
+  const btn=document.getElementById('circBtn1');
+  btn.textContent='✅ 回覧しました。次の世帯へ送信済みです';
+  btn.disabled=true;
+  document.getElementById('circBadge').style.display='none';
+  updateBadges();
+  showToast('📮 4組へ通知を送りました');
+}
+
+/* ─── Events ─────────────────────────────────────────────── */
+function renderEvents(){
+  document.getElementById('eventList').innerHTML=events.map(e=>`
+    <div class="card" style="margin-bottom:8px">
+      <div class="ev-card">
+        <div class="ev-hdr">
+          <div class="ev-title">${e.title}</div>
+          <span class="ev-tag ${e.tag}">${e.tag==='soon'?'⚡ 直近':'📅 予定'}</span>
+        </div>
+        <div class="ev-info">
+          <span>📅 ${e.date}</span>
+          <span>🕐 ${e.time}</span>
+          <span>📍 ${e.location}</span>
+        </div>
+        <div class="rsvp-counts">
+          <div class="rsvp-count rc-join"><div class="num" id="e${e.id}a">${e.attending}</div><div class="lbl">参加</div></div>
+          <div class="rsvp-count rc-absent"><div class="num" id="e${e.id}b">${e.absent}</div><div class="lbl">不参加</div></div>
+          <div class="rsvp-count rc-undecided"><div class="num" id="e${e.id}u">${e.undecided}</div><div class="lbl">未定</div></div>
+        </div>
+        <div class="rsvp-btns">
+          <button class="rsvp-btn r-join ${e.myRsvp==='参加'?'sel':''}" id="e${e.id}b参加" onclick="rsvp(${e.id},'参加')">✓ 参加</button>
+          <button class="rsvp-btn r-absent ${e.myRsvp==='不参加'?'sel':''}" id="e${e.id}b不参加" onclick="rsvp(${e.id},'不参加')">✗ 不参加</button>
+          <button class="rsvp-btn r-undecided ${e.myRsvp==='未定'?'sel':''}" id="e${e.id}b未定" onclick="rsvp(${e.id},'未定')">？ 未定</button>
+        </div>
+        <div class="my-answer" id="e${e.id}ans">${e.myRsvp?'あなたの回答：'+e.myRsvp:''}</div>
+      </div>
+    </div>`).join('');
+}
+
+function rsvp(eventId, ans){
+  const e=events.find(x=>x.id===eventId);
+  const prev=e.myRsvp;
+  if(prev==='参加') e.attending--;
+  else if(prev==='不参加') e.absent--;
+  else if(prev==='未定') e.undecided--;
+  if(prev===ans){ e.myRsvp=null; }
+  else {
+    e.myRsvp=ans;
+    if(ans==='参加') e.attending++;
+    else if(ans==='不参加') e.absent++;
+    else e.undecided++;
+  }
+  renderEvents();
+  showToast(e.myRsvp?`「${e.title}」に「${ans}」で回答しました`:'回答を取り消しました');
+}
+
+/* ─── Duties ─────────────────────────────────────────────── */
+function renderDuties(){
+  document.getElementById('dutyList').innerHTML=duties.map(d=>`
+    <div class="duty-item ${d.today?'today':''}">
+      <div class="duty-day">${d.day}<br><span>${d.date}</span></div>
+      <div class="duty-type">${d.type}</div>
+      <div class="duty-person">${d.person}${d.today?'<span class="today-lbl">本日</span>':''}</div>
+    </div>`).join('');
+}
+
+/* ─── Admin ──────────────────────────────────────────────── */
+function toggleAdmin(){
+  isAdmin=!isAdmin;
+  const btn=document.getElementById('adminToggle');
+  btn.textContent=isAdmin?'役員モード ON':'役員モード OFF';
+  btn.className=isAdmin?'admin-toggle on':'admin-toggle';
+  document.getElementById('fab').className=isAdmin?'fab visible':'fab';
+  document.getElementById('addEvtBtn').className=isAdmin?'sec-action visible':'sec-action';
+  showToast(isAdmin?'🔑 役員モードに切り替えました（投稿ボタンが表示されます）':'一般モードに切り替えました');
+}
+
+/* ─── Form ───────────────────────────────────────────────── */
+function openForm(){ document.getElementById('formOverlay').classList.add('open') }
+function closeForm(){ document.getElementById('formOverlay').classList.remove('open') }
+function outsideForm(e){ if(e.target===document.getElementById('formOverlay')) closeForm() }
+function submitNotice(){
+  closeForm();
+  showToast('🔔 お知らせを投稿しました（住民に通知が送られました）');
+}
+
+/* ─── Badges ─────────────────────────────────────────────── */
+function updateBadges(){
+  const unread=notices.filter(n=>!n.read).length;
+  const nb=document.getElementById('noticeBadge');
+  nb.textContent=unread;
+  nb.style.display=unread>0?'':'none';
+  document.getElementById('notifBadge').textContent=unread+(circDone?0:1);
+}
+
+/* ─── Toast ──────────────────────────────────────────────── */
+let tt;
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.classList.add('show');
+  clearTimeout(tt);
+  tt=setTimeout(()=>t.classList.remove('show'),2600);
+}
+</script>
+</body>
+</html>
